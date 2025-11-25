@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>RedHunllef</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Live Shuffle.com wager race leaderboard with real-time updates." />
+  <link rel="icon" href="{{ url_for('static', filename='redlogo.ico') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="container header-content">
+      <a href="/" class="brand" aria-label="Homepage">
+        <img src="{{ url_for('static', filename='redlogo.png') }}" alt="RedHunllef logo" class="logo" />
+        <h1 class="brand-title">RedHunllef</h1>
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container hero-inner">
+      <h2 class="hero-heading">
+        RedHunllef: Gambling, Gaming, & Variety Streamer
+      </h2>
+
+      <!-- Live Status Badge -->
+      <div id="liveStatus" class="live-status" role="status" aria-live="polite">
+        <span class="dot"></span>
+        <span class="text">Checking…</span>
+        <span class="viewer-chip" style="display:none"></span>
+        <a class="live-cta" href="https://kick.com/redhunllef" target="_blank" rel="noopener">Open Kick</a>
+      </div>
+
+      <!-- Countdown pills: DD : HH : MM : SS -->
+      <div id="countdown" class="countdown-wrap" aria-live="polite">
+        <div class="time-pill"><span id="dd">00</span><label>Days</label></div>
+        <div class="sep">:</div>
+        <div class="time-pill"><span id="hh">00</span><label>Hours</label></div>
+        <div class="sep">:</div>
+        <div class="time-pill"><span id="mm">00</span><label>Minutes</label></div>
+        <div class="sep">:</div>
+        <div class="time-pill"><span id="ss">00</span><label>Seconds</label></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sponsors -->
+  <section class="sponsors container">
+    <h2 class="section-title">Sponsors</h2>
+    <p class="section-subtitle">Thanks to our sponsors for supporting the streams!</p>
+    <div class="sponsors-grid">
+      <a href="https://shuffle.com/?r=Red" class="sponsor-btn" target="_blank" rel="noopener">Shuffle.com</a>
+      <a href="https://runestake.com/r/Red" class="sponsor-btn" target="_blank" rel="noopener">RuneStake.com</a>
+    </div>
+  </section>
+
+  <!-- Live race content -->
+  <section class="race container">
+    <div class="race-inner">
+      <div class="race-header">
+        <h2 class="section-title centered">Shuffle Wager Leaderboard</h2>
+      </div>
+
+      <div class="helper-card">
+        <p><strong>Check out the wager placements below!</strong> — no refresh needed.</p>
+      </div>
+
+      <!-- Top 3 -->
+      <div id="podium" class="podium-olympic" aria-label="Top 3 leaderboard"></div>
+
+      <!-- 4–10 -->
+      <ul id="others-list" class="others-inline" aria-label="Ranks 4 to 10"></ul>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <img src="{{ url_for('static', filename='redlogo.png') }}" alt="" class="footer-logo" />
+        <div>
+          <h3>RedHunllef</h3>
+          <p class="muted">Live leaderboards & streams.</p>
+        </div>
+      </div>
+      <nav class="footer-links">
+        <a href="/" aria-label="Home">Home</a>
+        <a href="https://shuffle.com/?r=Red" target="_blank" rel="noopener">Shuffle</a>
+        <a href="https://runestake.com/r/Red" target="_blank" rel="noopener">RuneStake</a>
+      </nav>
+      <div class="footer-meta">
+        <p>&copy; <span id="year"></span> RedHunllef. All rights reserved.</p>
+        <p>Site by <a href="https://kick.com/gingrsnaps" target="_blank" rel="noopener">GingrSnaps</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+</body>
+</html>

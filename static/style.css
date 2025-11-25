@@ -1,0 +1,212 @@
+/* ===== Base / Theme ===== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
+
+:root{
+  --bg:#0f0f0f; --card:#141414; --card-2:#1b1b1b; --border:#2a2a2a;
+  --accent:#52ff33; --text:#f0f0f0; --text-alt:#b5b5b5;
+  --gold:#ffd700; --silver:#c0c0c0; --bronze:#cd7f32; --shadow:0 8px 28px rgba(0,0,0,.6)
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+img{max-width:100%;height:auto;display:block}
+a{color:#7da2ff;text-decoration:none}
+a:hover{color:#a5bbff}
+.container{width:min(1200px,92%);margin-inline:auto}
+
+/* ===== Header ===== */
+.header{position:sticky;top:0;z-index:1000;background:rgba(20,20,20,.85);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+.header-content{display:flex;align-items:center;justify-content:space-between;padding:.9rem 0}
+.brand{display:flex;align-items:center;gap:.8rem;text-decoration:none;color:var(--text)}
+.logo{width:clamp(36px,4vw,44px);height:clamp(36px,4vw,44px);animation:logo-bounce 3.2s ease-in-out infinite;transform-origin:bottom center}
+@keyframes logo-bounce{0%,20%,50%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}60%{transform:translateY(-3px)}}
+@media (prefers-reduced-motion:reduce){.logo{animation:none}}
+.brand-title{font-size:clamp(1.05rem,2.2vw,1.25rem);font-weight:900;letter-spacing:.2px}
+
+/* ===== Hero ===== */
+.hero{background:radial-gradient(1000px 500px at 20% -10%,#242424 10%,transparent 60%),linear-gradient(135deg,#111,#171717);padding:clamp(2.4rem,4.5vw,3.5rem) 0 clamp(1.6rem,3vw,2.5rem);text-align:center;border-bottom:1px solid var(--border)}
+.hero-heading{font-size:clamp(1.6rem,4.6vw,2.3rem);font-weight:900;letter-spacing:-.01em;margin-bottom:.8rem}
+
+/* Live status badge */
+.live-status{display:inline-flex;align-items:center;gap:.6rem;margin:.25rem 0 1.1rem;background:var(--card-2);border:1px solid var(--border);border-radius:999px;padding:.45rem .75rem .45rem .55rem;box-shadow:var(--shadow)}
+.live-status .dot{width:.65rem;height:.65rem;border-radius:999px;background:#999;animation:none}
+.live-status.live  .dot{background:#ff4747;box-shadow:0 0 12px #ff4747aa;animation:pulse 1.4s infinite ease-in-out}
+.live-status.off   .dot{background:#666}
+.live-status.unk   .dot{background:#999}
+.live-status .text{font-weight:900;color:#fff}
+.live-status .live-cta{margin-left:.4rem;font-weight:900;color:#fff;text-decoration:none;background:#26c281;border-radius:999px;padding:.35rem .7rem}
+.live-status .live-cta:hover{filter:brightness(1.05)}
+.viewer-chip{display:none;align-items:center;gap:.35rem;background:#202b20;color:#d8ffd3;border:1px solid #2f4e2f;border-radius:999px;padding:.25rem .6rem;font-weight:800;font-size:.85rem}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}
+
+/* Countdown pills */
+.countdown-wrap{display:inline-flex;align-items:stretch;gap:.6rem;margin-top:.2rem}
+.time-pill{background:var(--card-2);border:1px solid var(--border);border-radius:12px;min-width:clamp(68px,14vw,100px);padding:.5rem .6rem;display:grid;place-items:center}
+.time-pill span{font-weight:900;font-size:clamp(1.2rem,4vw,1.8rem);line-height:1}
+.time-pill label{font-size:.75rem;color:var(--text-alt);text-transform:uppercase;letter-spacing:.5px}
+.sep{display:grid;place-items:center;opacity:.6;font-weight:900}
+
+/* ===== Sponsors ===== */
+.sponsors{padding:2.2rem 0;text-align:center}
+.section-title{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:900;margin-bottom:.3rem}
+.section-title.centered{text-align:center}
+.section-subtitle{color:var(--text-alt);margin-bottom:1.2rem}
+.sponsors-grid{display:flex;flex-wrap:wrap;gap:.8rem;justify-content:center}
+.sponsor-btn{background:#d63a3a;color:#fff;padding:.7rem 1.3rem;border-radius:9999px;font-weight:800;text-decoration:none;transition:transform .15s ease,box-shadow .15s ease;box-shadow:0 12px 30px rgba(214,58,58,.25)}
+.sponsor-btn:hover{transform:translateY(-2px) scale(1.02)}
+
+/* ===== Race Card ===== */
+.race-inner{background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0)),var(--card);padding:clamp(1rem,2.2vw,1.4rem);border-radius:14px;box-shadow:var(--shadow);margin-bottom:3rem;border:1px solid var(--border)}
+.race-header{display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap}
+.helper-card{background:var(--card-2);border:1px solid var(--border);border-radius:12px;padding:.9rem 1rem;color:var(--text-alt);margin:1.0rem 0 1.75rem} /* extra bottom spacing */
+
+/* ===== Podium (Top 3) ===== */
+.podium-olympic{
+  display:grid;
+  grid-template-columns:1fr minmax(260px,1.2fr) 1fr; /* 2nd | 1st | 3rd */
+  gap:clamp(.8rem,2.6vw,1.2rem);
+  align-items:end;
+  margin:0.75rem 0 1.6rem;
+}
+
+/* Use CSS variables to combine base lift + hover lift */
+.podium-seat{
+  --lift: 0px;         /* base podium raise */
+  --hover-lift: 0px;   /* extra motion on hover */
+  position:relative;
+  background:var(--card-2);
+  border:1px solid var(--border);
+  border-radius:16px;
+  box-shadow:var(--shadow);
+  padding:1.6rem .9rem 1.3rem;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:.25rem;
+  cursor: default;
+  transform: translateY(calc(var(--lift) + var(--hover-lift)));
+  transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
+  overflow:visible;
+}
+.podium-seat:hover{
+  --hover-lift: -4px;                     /* gentle float */
+  box-shadow:0 12px 36px rgba(0,0,0,.55); /* soft glow, not a button */
+  filter: brightness(1.02);
+}
+
+.podium-seat .rank-badge{
+  position:absolute; top:10px; left:10px;
+  background:#000; color:#fff; border:2px solid #333;
+  width:2rem; height:2rem; border-radius:50%;
+  display:grid; place-items:center; font-weight:900;
+}
+
+/* Medal container — centered emoji from JS */
+.podium-seat .crown{
+  width:100%;
+  min-height:1.2em;
+  font-size:clamp(2.2rem,5.5vw,3rem);
+  line-height:1;
+  margin-bottom:.15rem;
+  display:block;
+  text-align:center;
+}
+
+/* Base “podium” raise per place (via --lift) */
+.podium-seat.col-first{
+  --lift: -16px;
+  min-height:clamp(220px,28vw,260px);
+  border-color:var(--gold);
+  box-shadow:0 0 32px #ffd70033,var(--shadow);
+}
+.podium-seat.col-second{
+  --lift: -6px;
+  min-height:clamp(170px,24vw,210px);
+  border-color:var(--silver);
+  box-shadow:0 0 26px #c0c0c033,var(--shadow);
+}
+.podium-seat.col-third{
+  --lift: 0px;
+  min-height:clamp(150px,22vw,196px);
+  border-color:var(--bronze);
+  box-shadow:0 0 22px #cd7f3233,var(--shadow);
+}
+
+/* Prominence of names + amounts */
+.podium-seat .user{font-weight:900;font-size:clamp(1.05rem,3.2vw,1.25rem);overflow-wrap:anywhere}
+.podium-seat .label{font-size:.73rem;color:var(--text-alt);text-transform:uppercase;letter-spacing:.4px;margin-top:.1rem}
+.podium-seat .wager{font-size:1.05rem;overflow-wrap:anywhere}
+.podium-seat .prize{font-weight:900;color:var(--accent)}
+.success-badge{display:none !important}
+
+/* ===== 4–10 row ===== */
+.others-inline{
+  --others-count:7;
+  display:grid;
+  grid-template-columns:repeat(var(--others-count),1fr);
+  gap:.9rem;
+  overflow:visible;
+  padding-top:.2rem;
+}
+.others-inline li{
+  --hover-lift: 0px;
+  position:relative;
+  background:var(--card-2);
+  border:1px solid var(--border);
+  border-radius:12px;
+  box-shadow:var(--shadow);
+  padding:2.2rem .9rem 1rem;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:.25rem;
+  height:190px;
+  cursor: default;
+  transform: translateY(var(--hover-lift));
+  transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
+  overflow:visible;
+  will-change: transform;
+}
+.others-inline li:hover{
+  --hover-lift: -3px;                          /* subtle movement */
+  box-shadow:0 10px 30px rgba(0,0,0,.5);
+  filter: brightness(1.015);
+}
+.others-inline .position{
+  position:absolute; top:10px; left:10px; background:#000; color:#fff;
+  border:2px solid #333; border-radius:999px; padding:.1rem .5rem; font-weight:900;
+}
+.others-inline .username{font-weight:900;overflow-wrap:anywhere}
+.others-inline .label.emphasized{font-size:.75rem;color:var(--accent);font-weight:900;text-transform:uppercase}
+.others-inline .wager{color:var(--text-alt);overflow-wrap:anywhere}
+.others-inline .prize{font-weight:900;color:var(--accent)}
+
+/* ===== Footer ===== */
+.footer{background:#121212;border-top:1px solid var(--border);padding:2rem 0}
+.footer-grid{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:1rem;align-items:start}
+.footer-brand{display:flex;gap:.8rem;align-items:center}
+.footer-logo{width:36px;height:36px}
+.footer-brand h3{margin:0;font-weight:900}
+.footer-brand .muted{color:var(--text-alt);font-size:.9rem}
+.footer-links{display:grid;gap:.35rem;align-content:start}
+.footer-links a{color:var(--text-alt);text-decoration:none;font-weight:700}
+.footer-links a:hover{color:var(--text)}
+.footer-meta{text-align:right;color:var(--text-alt);font-size:.95rem}
+.footer-meta a{color:var(--accent);text-decoration:none;font-weight:800}
+.footer-meta a:hover{text-decoration:underline}
+
+/* ===== Effects ===== */
+.fade-in{animation:fadeIn .4s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== Mobile ===== */
+@media (max-width:900px){
+  .podium-olympic{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:1fr;text-align:center}
+  .footer-meta{text-align:center}
+  .others-inline{grid-template-columns:1fr;overflow:visible}
+  .others-inline li{height:auto}
+}
