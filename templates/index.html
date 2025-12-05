@@ -7,7 +7,7 @@
   <meta name="description" content="Live Shuffle.com wager race leaderboard with real-time updates for RedHunllef." />
   <meta name="theme-color" content="#52ff33" />
   <link rel="icon" href="{{ url_for('static', filename='redlogo.ico') }}" />
-  <!-- Single CSS bundle for the entire front-end -->
+  <!-- Main stylesheet -->
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
 <body>
@@ -18,6 +18,7 @@
     <div class="container nav">
       <a href="/" class="brand" aria-label="RedHunllef home">
         <div class="logo">
+          <!-- Bouncing logo; animation handled in style.css -->
           <img src="{{ url_for('static', filename='redlogo.png') }}" alt="RedHunllef logo" loading="lazy" />
         </div>
         <div class="brand-text">
@@ -71,9 +72,17 @@
             </a>
           </div>
 
+          <!-- Responsible gambling link (NCPG) -->
           <p class="hero-footnote">
             Updates every 60 seconds •
-            <strong>Gamble responsibly.</strong>
+            <a
+              class="responsible-link"
+              href="https://www.ncpgambling.org/responsible-gambling/"
+              target="_blank"
+              rel="noopener"
+            >
+              Gamble responsibly
+            </a>.
           </p>
         </div>
 
@@ -93,7 +102,7 @@
               target="_blank"
               rel="noopener"
             >
-              Open Kick
+              Watch on Kick
             </a>
           </div>
 
@@ -130,84 +139,7 @@
     </section>
 
     <!-- =======================================================
-         Leaderboard (top 10)
-         ======================================================= -->
-    <section id="leaderboard" class="race-section">
-      <div class="container">
-        <div class="race-header-row">
-          <div>
-            <h2 class="section-title">Leaderboard</h2>
-            <p class="section-subtitle">
-              Top 10 wagerers for the active race — usernames are partially
-              obscured on the site, but full names are logged securely on the backend.
-            </p>
-          </div>
-        </div>
-
-        <div class="race-layout">
-          <!-- Main leaderboard card -->
-          <section class="leaderboard-card" aria-label="Top 10 leaderboard">
-            <div class="helper-card">
-              <p>
-                <strong>No manual refresh needed.</strong>
-                This board updates automatically every 60 seconds from the Shuffle API.
-              </p>
-            </div>
-
-            <!-- Top 3 podium -->
-            <div
-              id="podium"
-              class="podium-olympic"
-              aria-label="Top 3 wagerers"
-            ></div>
-
-            <!-- Ranks 4–10 -->
-            <ul
-              id="others-list"
-              class="others-inline"
-              aria-label="Ranks 4 to 10"
-            ></ul>
-          </section>
-
-          <!-- Aside: prize table + info -->
-          <aside class="race-aside" aria-label="Race information">
-            <div>
-              <h3>Race details</h3>
-              <p class="race-meta">
-                The RedHunllef wager race uses live affiliate data from
-                Shuffle.com. Rankings are based on <strong>total wagered amount</strong>
-                during the configured window.
-              </p>
-            </div>
-
-            <div>
-              <h3>Prize breakdown</h3>
-              <ul class="prize-grid" aria-label="Prize amounts from 1st–10th place">
-                <li><span>1st</span><span>$1,000.00</span></li>
-                <li><span>2nd</span><span>$500.00</span></li>
-                <li><span>3rd</span><span>$300.00</span></li>
-                <li><span>4th</span><span>$200.00</span></li>
-                <li><span>5th</span><span>$150.00</span></li>
-                <li><span>6th</span><span>$75.00</span></li>
-                <li><span>7th</span><span>$50.00</span></li>
-                <li><span>8th</span><span>$40.00</span></li>
-                <li><span>9th</span><span>$25.00</span></li>
-                <li><span>10th</span><span>$10.00</span></li>
-              </ul>
-            </div>
-
-            <p class="race-meta">
-              All displayed usernames are intentionally masked with asterisks
-              to protect player privacy. Backend logs still include full
-              usernames for auditing and prize verification.
-            </p>
-          </aside>
-        </div>
-      </div>
-    </section>
-
-    <!-- =======================================================
-         Sponsors
+         Sponsors (high on the page)
          ======================================================= -->
     <section id="sponsors" class="sponsors">
       <div class="container sponsors-inner">
@@ -236,6 +168,66 @@
         </div>
       </div>
     </section>
+
+    <!-- =======================================================
+         Leaderboard (top 10)
+         ======================================================= -->
+    <section id="leaderboard" class="race-section">
+      <div class="container">
+        <div class="race-header-row">
+          <div>
+            <h2 class="section-title">Leaderboard</h2>
+            <p class="section-subtitle">
+              Top 10 wagerers for the active race — usernames are partially
+              obscured on the site, but full names are logged securely on the backend.
+            </p>
+          </div>
+        </div>
+
+        <div class="race-layout">
+          <!-- Main leaderboard card -->
+          <section class="leaderboard-card" aria-label="Top 10 leaderboard">
+            <div class="helper-card">
+              <p>
+                <strong>No manual refresh needed.</strong>
+                This board updates automatically from the Shuffle API using the configured race window.
+              </p>
+            </div>
+
+            <!-- Top 3 podium (populated by script.js from /data) -->
+            <div
+              id="podium"
+              class="podium-olympic"
+              aria-label="Top 3 wagerers"
+            ></div>
+
+            <!-- Ranks 4–10 (populated by script.js from /data) -->
+            <ul
+              id="others-list"
+              class="others-inline"
+              aria-label="Ranks 4 to 10"
+            ></ul>
+          </section>
+        </div>
+
+        <!-- Race info under placements -->
+        <section class="race-info-inline" aria-label="Race information">
+          <h3>Race details</h3>
+          <p class="race-meta">
+            The RedHunllef wager race uses live affiliate data from Shuffle.com.
+            Rankings are based on <strong>total wagered amount</strong> during the configured
+            time window. All displayed usernames are intentionally masked with asterisks
+            to protect player privacy, while full usernames are logged server-side
+            for auditing and prize verification.
+          </p>
+          <p class="race-meta disclaimer">
+            Wager totals and payouts shown here are for informational purposes only
+            and may be subject to independent verification, review, and adjustment
+            by Shuffle.com and the event organizers.
+          </p>
+        </section>
+      </div>
+    </section>
   </main>
 
   <!-- =========================================================
@@ -249,11 +241,15 @@
           <a href="#leaderboard">Leaderboard</a>
           <a href="#sponsors">Sponsors</a>
           <a href="https://kick.com/redhunllef" target="_blank" rel="noopener">Kick</a>
+          <a href="https://discord.gg/nhCbCZQEMK" target="_blank" rel="noopener">Discord</a>
         </div>
       </div>
       <div class="footer-meta">
         <span>Site experience by <a href="https://kick.com/gingrsnaps" target="_blank" rel="noopener">GingrSnaps</a></span>
         <span>Backend powered by Shuffle affiliate data.</span>
+        <span class="footer-disclaimer">
+          All wagering and payouts are subject to review and verification.
+        </span>
       </div>
     </div>
   </footer>

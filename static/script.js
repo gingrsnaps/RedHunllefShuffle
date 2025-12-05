@@ -22,8 +22,14 @@
   const yearOut = $('#year');
 
   // ===========================================================
-  // Prize table (must match backend / visual card)
+  // Config for this race (frontend side)
   // ===========================================================
+  // NOTE:
+  // - To change prize amounts, edit the PRIZES object below.
+  // - To change the active race window and refresh rate,
+  //   update START_TIME, END_TIME and REFRESH_SECONDS in the
+  //   backend (environment variables read in wager_backend.py).
+  //   The frontend reads refresh_seconds/end_time from /config.
   const PRIZES = {
     1: '$1,000.00',
     2: '$500.00',
@@ -49,10 +55,76 @@
   }
 
   /**
-   * Render the podium (Top 3). This keeps the visual layout
-   * but works entirely from the public /data payload, which
-   * already censors usernames with asterisks. The backend
-   * still logs full names to its own console.
+   * Return a small "client meta" object for debug logs.
+   * (No extra dependencies, browser-only info.)
+   */
+  function makeClientMeta() {
+    return {
+      ts: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      language: navigator.language,
+      viewport: `${window.innerWidth}x${window.innerHeight}`
+    };
+  }
+
+  /**
+   * Structured debug log for config.
+   * @param {object} cfg
+   */
+  function debugLogConfig(cfg) {
+    try {
+      console.groupCollapsed('[config] loaded');
+      console.log('meta', makeClientMeta());
+      console.log('config payload', cfg);
+      console.groupEnd();
+    } catch (err) {
+      console.warn('[config] debug log failed', err);
+    }
+  }
+
+  /**
+   * Structured debug log for leaderboard payload.
+   * Logs raw podium/others entries so any full usernames or IP fields
+   * the backend includes will show here.
+   *
+   * @param {object} payload
+   */
+  function debugLogLeaderboard(payload) {
+    try {
+      const podiumRaw = Array.isArray(payload?.podium) ? payload.podium : [];
+      const othersRaw = Array.isArray(payload?.others) ? payload.others : [];
+      console.groupCollapsed(
+        `[leaderboard] refresh (podium=${podiumRaw.length}, others=${othersRaw.length})`
+      );
+      console.log('meta', makeClientMeta());
+      console.log('raw podium entries', podiumRaw);
+      console.log('raw other entries', othersRaw);
+      console.groupEnd();
+    } catch (err) {
+      console.warn('[leaderboard] debug log failed', err);
+    }
+  }
+
+  /**
+   * Structured debug log for stream payload.
+   * @param {object} data
+   */
+  function debugLogStream(data) {
+    try {
+      console.groupCollapsed('[stream] status');
+      console.log('meta', makeClientMeta());
+      console.log('raw stream payload', data);
+      console.groupEnd();
+    } catch (err) {
+      console.warn('[stream] debug log failed', err);
+    }
+  }
+
+  /**
+   * Render the podium (Top 3).
+   * Works entirely from the public /data payload, which already
+   * censors usernames with asterisks. The backend logs full
+   * usernames server-side for auditing / prize verification.
    *
    * @param {Array<{username: string, wager: string}>} podiumRaw
    */
@@ -93,13 +165,21 @@
       const el = document.createElement('article');
       el.className = `podium-seat ${cls} fade-in`;
 
+      // Each podium card shows: username, Total Wager, Prize.
       el.innerHTML = `
         <div class="rank-badge">#${place}</div>
         <span class="crown" aria-hidden="true">${medal}</span>
         <div class="username" title="${entry.username}">${entry.username}</div>
-        <span class="label">Total Wager</span>
-        <div class="wager">${entry.wagerStr}</div>
-        <div class="prize">${PRIZES[place] ?? '$0.00'}</div>
+        <div class="podium-stats">
+          <div class="stat-block">
+            <span class="stat-label">Total Wager</span>
+            <span class="stat-value">${entry.wagerStr}</span>
+          </div>
+          <div class="stat-block">
+            <span class="stat-label">Prize</span>
+            <span class="stat-value prize-value">${PRIZES[place] ?? '$0.00'}</span>
+          </div>
+        </div>
       `;
 
       podiumEl.appendChild(el);
@@ -158,9 +238,14 @@
           <li class="fade-in">
             <span class="position">#${row.rank}</span>
             <div class="username" title="${row.username}">${row.username}</div>
-            <div class="label emphasized">Wager</div>
-            <div class="wager">${row.wagerStr}</div>
-            <div class="prize">${prize}</div>
+            <div class="stat-block">
+              <span class="stat-label">Total Wager</span>
+              <span class="stat-value">${row.wagerStr}</span>
+            </div>
+            <div class="stat-block">
+              <span class="stat-label">Prize</span>
+              <span class="stat-value prize-value">${prize}</span>
+            </div>
           </li>
         `;
       })
@@ -183,9 +268,9 @@
       buildPodium(payload.podium || []);
       buildOthers(payload.others || []);
 
-      // This only logs the public (censored) payload to the browser console.
-      // Full usernames are logged by the backend itself.
-      console.info('[leaderboard] updated', payload);
+      // Structured debug logging so raw entries (including any full usernames or IP fields)
+      // are visible in the browser console without affecting the UI.
+      debugLogLeaderboard(payload);
     } catch (error) {
       console.error('[leaderboard] failed', error);
     }
@@ -230,7 +315,7 @@
         if (viewerChip) viewerChip.style.display = 'none';
       }
 
-      console.info('[stream] status', data);
+      debugLogStream(data);
     } catch (error) {
       // Do not spam the user on transient errors; keep pill in "unknown".
       liveEl.classList.remove('live', 'off');
@@ -242,58 +327,86 @@
   }
 
   /**
-   * Initialize the countdown timer based on /config.
-   * We only need the end time; the backend controls the current race window.
+   * Set up the countdown timer.
+   * @param {number|null} endTimeSeconds - Unix timestamp in seconds
    */
-  async function initCountdown() {
+  function setupCountdown(endTimeSeconds) {
     if (!dd || !hh || !mm || !ss) return;
 
-    try {
-      const response = await fetch('/config', { cache: 'no-store' });
-      if (!response.ok) throw new Error(`config status ${response.status}`);
+    const end = typeof endTimeSeconds === 'number' && endTimeSeconds > 0
+      ? endTimeSeconds
+      : null;
 
-      const config = await response.json();
-      const end = Number(config.end_time) || 0;
+    const update = () => {
+      if (!end) {
+        dd.textContent = '00';
+        hh.textContent = '00';
+        mm.textContent = '00';
+        ss.textContent = '00';
+        return;
+      }
 
-      const update = () => {
-        const now = Math.floor(Date.now() / 1000);
-        let delta = Math.max(0, end - now);
+      const now = Math.floor(Date.now() / 1000);
+      let delta = Math.max(0, end - now);
 
-        const days = Math.floor(delta / 86400); delta -= days * 86400;
-        const hours = Math.floor(delta / 3600); delta -= hours * 3600;
-        const mins = Math.floor(delta / 60);    delta -= mins * 60;
-        const secs = delta;
+      const days = Math.floor(delta / 86400); delta -= days * 86400;
+      const hours = Math.floor(delta / 3600); delta -= hours * 3600;
+      const mins = Math.floor(delta / 60);    delta -= mins * 60;
+      const secs = delta;
 
-        dd.textContent = String(days).padStart(2, '0');
-        hh.textContent = String(hours).padStart(2, '0');
-        mm.textContent = String(mins).padStart(2, '0');
-        ss.textContent = String(secs).padStart(2, '0');
-      };
+      dd.textContent = String(days).padStart(2, '0');
+      hh.textContent = String(hours).padStart(2, '0');
+      mm.textContent = String(mins).padStart(2, '0');
+      ss.textContent = String(secs).padStart(2, '0');
+    };
 
-      update();
-      setInterval(update, 1000);
-    } catch (error) {
-      console.warn('[countdown] failed', error);
-    }
+    update();
+    setInterval(update, 1000);
   }
 
   // ===========================================================
   // Boot
   // =========================================================== */
 
-  function boot() {
+  async function boot() {
     if (yearOut) {
       yearOut.textContent = new Date().getFullYear();
     }
 
+    let refreshMs = 60_000;  // fallback refresh cadence
+    let endTime   = null;
+
+    // Pull config once: start_time, end_time, refresh_seconds
+    try {
+      const response = await fetch('/config', { cache: 'no-store' });
+      if (!response.ok) throw new Error(`config status ${response.status}`);
+      const cfg = await response.json();
+
+      const r = Number(cfg.refresh_seconds);
+      if (!Number.isNaN(r) && r > 0) {
+        refreshMs = r * 1000;
+      }
+
+      const e = Number(cfg.end_time);
+      if (!Number.isNaN(e) && e > 0) {
+        endTime = e;
+      }
+
+      debugLogConfig(cfg);
+    } catch (error) {
+      console.warn('[config] failed, using defaults', error);
+    }
+
+    // Countdown uses the endTime from config (if available)
+    setupCountdown(endTime);
+
     // Initial paint
     fetchData();
     fetchStream();
-    initCountdown();
 
-    // Background refresh (60s, matches REFRESH_SECONDS default)
-    setInterval(fetchData, 60_000);
-    setInterval(fetchStream, 60_000);
+    // Background refresh in sync with backend cache refresh
+    setInterval(fetchData, refreshMs);
+    setInterval(fetchStream, refreshMs);
   }
 
   document.addEventListener('DOMContentLoaded', boot);

@@ -1,30 +1,26 @@
 /* ============================================================
-   Global theme & reset
-   - Dark glassmorphism theme
-   - Mobile-first and responsive
+   Global theme and reset
    ============================================================ */
 
 :root {
   --bg: #050509;
-  --bg-elevated: rgba(17, 17, 24, 0.96);
-  --bg-elevated-soft: rgba(22, 22, 32, 0.9);
-  --border-subtle: rgba(255, 255, 255, 0.04);
-  --border-strong: rgba(255, 255, 255, 0.12);
-  --accent: #52ff33;           /* Kick green */
-  --accent-soft: rgba(82, 255, 51, 0.12);
-  --accent-strong: rgba(82, 255, 51, 0.32);
+  --bg-elevated: rgba(15, 15, 25, 0.96);
+  --bg-soft: rgba(18, 18, 30, 0.96);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --accent: #52ff33;          /* Kick green */
+  --accent-soft: rgba(82, 255, 51, 0.2);
   --text-main: #f5f5f7;
-  --text-subtle: #a5a5b0;
+  --text-subtle: #a5a5b5;
   --danger: #ff4b5c;
   --gold: #ffd700;
   --silver: #c0c0c0;
   --bronze: #cd7f32;
-  --shadow-soft: 0 18px 50px rgba(0, 0, 0, 0.75);
+  --shadow-soft: 0 20px 55px rgba(0, 0, 0, 0.85);
   --radius-lg: 1.25rem;
   --radius-pill: 999px;
 }
 
-/* Basic reset */
 *,
 *::before,
 *::after {
@@ -41,8 +37,8 @@ body {
   min-height: 100vh;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background:
-    radial-gradient(circle at 0% 0%, #27273a 0, transparent 55%),
-    radial-gradient(circle at 100% 100%, #11111f 0, transparent 55%),
+    radial-gradient(circle at 0% 0%, #26263c 0, transparent 55%),
+    radial-gradient(circle at 100% 100%, #111120 0, transparent 55%),
     linear-gradient(135deg, #050509, #050507);
   color: var(--text-main);
   line-height: 1.6;
@@ -50,17 +46,12 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Utility container & layout helpers */
-.container {
-  width: min(1180px, 92%);
-  margin-inline: auto;
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
 }
 
-main {
-  padding-bottom: 4rem;
-}
-
-/* Generic link styles */
 a {
   color: inherit;
   text-decoration: none;
@@ -70,7 +61,12 @@ a:hover {
   text-decoration: underline;
 }
 
-/* Simple button primitive used for CTAs and sponsor pills */
+.container {
+  width: min(1180px, 92%);
+  margin-inline: auto;
+}
+
+/* Buttons / pills */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -81,8 +77,8 @@ a:hover {
   border: 1px solid transparent;
   font-weight: 600;
   font-size: 0.95rem;
-  text-decoration: none;
   cursor: pointer;
+  text-decoration: none;
   transition:
     background 0.18s ease,
     border-color 0.18s ease,
@@ -94,12 +90,12 @@ a:hover {
 .btn-primary {
   background: linear-gradient(135deg, var(--accent), #83ff69);
   color: #041204;
-  box-shadow: 0 14px 40px var(--accent-strong);
+  box-shadow: 0 16px 40px rgba(82, 255, 51, 0.35);
 }
 
 .btn-primary:hover {
   transform: translateY(-1px);
-  filter: brightness(1.03);
+  filter: brightness(1.04);
 }
 
 .btn-ghost {
@@ -109,16 +105,16 @@ a:hover {
 }
 
 .btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.04);
 }
 
-/* Subtle badge / pill */
+/* Small badge used in hero kicker */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  border-radius: var(--radius-pill);
   padding: 0.15rem 0.7rem;
+  border-radius: var(--radius-pill);
   font-size: 0.8rem;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -164,18 +160,19 @@ a:hover {
   transform-origin: bottom center;
 }
 
+/* Explicit logo bounce for a subtle "alive" feel */
 @keyframes logo-bounce {
   0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
   40% { transform: translateY(-7px); }
   60% { transform: translateY(-4px); }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .logo {
-    animation: none;
-  }
+.logo img {
+  width: 100%;
+  height: 100%;
 }
 
+/* Brand text */
 .brand-text {
   display: flex;
   flex-direction: column;
@@ -204,14 +201,12 @@ a:hover {
 .nav-links a {
   color: var(--text-subtle);
   font-weight: 600;
-  text-decoration: none;
 }
 
 .nav-links a:hover {
   color: var(--text-main);
 }
 
-/* Mobile nav */
 @media (max-width: 720px) {
   .nav {
     gap: 1rem;
@@ -227,7 +222,7 @@ a:hover {
    ============================================================ */
 
 .hero {
-  padding-block: 2.8rem 2.2rem;
+  padding-block: 2.8rem 1.8rem;
 }
 
 .hero-layout {
@@ -235,10 +230,6 @@ a:hover {
   grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
   gap: clamp(1.6rem, 4vw, 2.6rem);
   align-items: center;
-}
-
-.hero-kicker {
-  margin-bottom: 0.6rem;
 }
 
 .hero-heading {
@@ -267,10 +258,19 @@ a:hover {
   color: var(--text-subtle);
 }
 
-.hero-footnote strong {
+/* NCPG link styling */
+.hero-footnote .responsible-link {
   color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
 }
 
+.hero-footnote .responsible-link:hover {
+  text-decoration: none;
+  filter: brightness(1.05);
+}
+
+/* Hero right-side status panel */
 .hero-panel {
   border-radius: var(--radius-lg);
   background:
@@ -283,10 +283,7 @@ a:hover {
   gap: 1.1rem;
 }
 
-/* ============================================================
-   Live status pill in hero panel
-   ============================================================ */
-
+/* Live status pill */
 .live-status {
   display: inline-flex;
   align-items: center;
@@ -308,7 +305,6 @@ a:hover {
 .live-status.live .dot {
   background: var(--danger);
   box-shadow: 0 0 12px rgba(255, 75, 92, 0.75);
-  animation: pulse 1.5s infinite ease-in-out;
 }
 
 .live-status.off .dot {
@@ -317,11 +313,6 @@ a:hover {
 
 .live-status.unk .dot {
   background: #777;
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.25); }
 }
 
 .live-status .text {
@@ -357,17 +348,13 @@ a:hover {
   font-weight: 700;
   background: rgba(82, 255, 51, 0.18);
   color: var(--accent);
-  text-decoration: none;
 }
 
 .live-cta:hover {
   background: rgba(82, 255, 51, 0.26);
 }
 
-/* ============================================================
-   Countdown card
-   ============================================================ */
-
+/* Countdown card */
 .countdown-card {
   padding-top: 0.4rem;
 }
@@ -392,7 +379,7 @@ a:hover {
   padding: 0.6rem 0.75rem;
   border-radius: 1rem;
   background: radial-gradient(circle at top, rgba(255, 255, 255, 0.06), transparent 55%),
-              var(--bg-elevated-soft);
+              var(--bg-soft);
   border: 1px solid var(--border-subtle);
   display: grid;
   place-items: center;
@@ -424,20 +411,16 @@ a:hover {
 }
 
 /* ============================================================
-   Leaderboard section
+   Sponsors
    ============================================================ */
 
-.race-section {
-  padding-block: 0.5rem 2.6rem;
+.sponsors {
+  padding-block: 1.2rem 2.0rem;
+  border-top: 1px solid var(--border-subtle);
 }
 
-.race-header-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.5rem;
-  margin-bottom: 1.4rem;
+.sponsors-inner {
+  text-align: center;
 }
 
 .section-title {
@@ -448,280 +431,6 @@ a:hover {
 .section-subtitle {
   font-size: 0.9rem;
   color: var(--text-subtle);
-}
-
-.race-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
-  gap: clamp(1.4rem, 3.2vw, 2.2rem);
-  align-items: flex-start;
-}
-
-/* Main leaderboard card */
-.leaderboard-card {
-  border-radius: var(--radius-lg);
-  background:
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.02), transparent),
-    var(--bg-elevated);
-  border: 1px solid var(--border-subtle);
-  box-shadow: var(--shadow-soft);
-  padding: 1.3rem 1.4rem 1.6rem;
-}
-
-.helper-card {
-  margin-bottom: 1.2rem;
-  padding: 0.7rem 0.85rem;
-  border-radius: 0.9rem;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px dashed var(--border-subtle);
-  font-size: 0.9rem;
-  color: var(--text-subtle);
-}
-
-/* Podium container (Top 3) */
-.podium-olympic {
-  display: grid;
-  grid-template-columns: 1fr minmax(0, 1.2fr) 1fr; /* 2nd | 1st | 3rd */
-  gap: clamp(0.8rem, 2.2vw, 1.2rem);
-  align-items: flex-end;
-  margin-bottom: 1.5rem;
-}
-
-/* Individual podium card created from JS */
-.podium-seat {
-  position: relative;
-  border-radius: 1rem;
-  background:
-    linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(25, 25, 40, 0.96));
-  border: 1px solid var(--border-strong);
-  padding: 0.9rem 0.9rem 1.1rem;
-  transform: translateY(var(--lift, 0));
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.85);
-  overflow: hidden;
-}
-
-/* Place-specific styling (height and accent) */
-.podium-seat.col-first {
-  --lift: -18px;
-  min-height: clamp(220px, 26vw, 260px);
-  border-color: var(--gold);
-  box-shadow: 0 0 32px rgba(255, 215, 0, 0.22), var(--shadow-soft);
-}
-
-.podium-seat.col-second {
-  --lift: -8px;
-  min-height: clamp(180px, 22vw, 220px);
-  border-color: var(--silver);
-}
-
-.podium-seat.col-third {
-  --lift: -4px;
-  min-height: clamp(170px, 20vw, 210px);
-  border-color: var(--bronze);
-}
-
-.podium-seat::before {
-  content: "";
-  position: absolute;
-  inset: auto -40%;
-  bottom: -40%;
-  height: 50%;
-  background: radial-gradient(circle at 50% 0, rgba(255, 255, 255, 0.06), transparent 55%);
-  opacity: 0.8;
-}
-
-.rank-badge {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  width: 2.1rem;
-  height: 2.1rem;
-  border-radius: 50%;
-  background: #000;
-  border: 2px solid #333;
-  display: grid;
-  place-items: center;
-  font-weight: 800;
-  font-size: 0.9rem;
-}
-
-.crown {
-  display: block;
-  margin-top: 0.3rem;
-  margin-bottom: 0.1rem;
-  text-align: center;
-  font-size: clamp(2.1rem, 5vw, 2.6rem);
-}
-
-.podium-seat .username {
-  font-weight: 800;
-  text-align: center;
-  margin-bottom: 0.45rem;
-  word-break: break-word;
-}
-
-.podium-seat .label {
-  display: block;
-  text-align: center;
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--text-subtle);
-  margin-bottom: 0.1rem;
-}
-
-.podium-seat .wager {
-  text-align: center;
-  font-weight: 700;
-}
-
-.podium-seat .prize {
-  margin-top: 0.45rem;
-  text-align: center;
-  font-weight: 800;
-  color: var(--accent);
-}
-
-/* 4–10 list card grid */
-.others-inline {
-  list-style: none;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.85rem;
-}
-
-.others-inline li {
-  position: relative;
-  height: 184px;
-  border-radius: 1rem;
-  background:
-    linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(18, 18, 30, 0.96));
-  border: 1px solid var(--border-subtle);
-  padding: 0.75rem 0.85rem 0.95rem;
-  display: grid;
-  align-content: flex-start;
-  gap: 0.25rem;
-  transform: translateY(0);
-  transition:
-    transform 0.14s ease,
-    box-shadow 0.14s ease,
-    filter 0.14s ease;
-}
-
-.others-inline li:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
-  filter: brightness(1.03);
-}
-
-.others-inline .position {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  border-radius: var(--radius-pill);
-  padding: 0.1rem 0.55rem;
-  font-size: 0.78rem;
-  border: 1px solid var(--border-strong);
-  background: #000;
-  font-weight: 700;
-}
-
-.others-inline .username {
-  font-weight: 700;
-  word-break: break-word;
-}
-
-.others-inline .label.emphasized {
-  margin-top: 0.6rem;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--accent);
-}
-
-.others-inline .wager {
-  font-size: 0.9rem;
-  color: var(--text-subtle);
-}
-
-.others-inline .prize {
-  margin-top: auto;
-  font-weight: 800;
-  color: var(--accent);
-}
-
-/* Fade-in helper used when JS replaces content */
-.fade-in {
-  animation: fadeIn 0.4s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ============================================================
-   Right rail: Race summary / prizes
-   ============================================================ */
-
-.race-aside {
-  border-radius: var(--radius-lg);
-  background:
-    radial-gradient(circle at 0 0, rgba(82, 255, 51, 0.16), transparent 60%),
-    var(--bg-elevated);
-  border: 1px solid var(--border-subtle);
-  box-shadow: var(--shadow-soft);
-  padding: 1.2rem 1.3rem 1.3rem;
-  display: grid;
-  gap: 1rem;
-}
-
-.race-aside h3 {
-  font-size: 1rem;
-  font-weight: 700;
-}
-
-.race-meta {
-  font-size: 0.86rem;
-  color: var(--text-subtle);
-}
-
-.prize-grid {
-  list-style: none;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.35rem;
-  font-size: 0.86rem;
-}
-
-.prize-grid li {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.4rem 0.55rem;
-  border-radius: 0.7rem;
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.prize-grid li span:nth-child(1) {
-  font-weight: 600;
-}
-
-.prize-grid li span:nth-child(2) {
-  font-weight: 700;
-}
-
-/* ============================================================
-   Sponsors
-   ============================================================ */
-
-.sponsors {
-  padding-block: 1.5rem 2.3rem;
-  border-top: 1px solid var(--border-subtle);
-}
-
-.sponsors-inner {
-  text-align: center;
 }
 
 .sponsors-inner .section-title {
@@ -762,6 +471,244 @@ a:hover {
 }
 
 /* ============================================================
+   Leaderboard
+   ============================================================ */
+
+.race-section {
+  padding-block: 0.5rem 2.6rem;
+}
+
+.race-header-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 1.4rem;
+}
+
+.race-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.4rem;
+}
+
+.leaderboard-card {
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02), transparent),
+    var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-soft);
+  padding: 1.3rem 1.4rem 1.6rem;
+}
+
+.helper-card {
+  margin-bottom: 1.2rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed var(--border-subtle);
+  font-size: 0.9rem;
+  color: var(--text-subtle);
+}
+
+/* Top 3 podium */
+.podium-olympic {
+  display: grid;
+  grid-template-columns: 1fr minmax(0, 1.2fr) 1fr; /* 2nd | 1st | 3rd */
+  gap: clamp(0.8rem, 2.2vw, 1.2rem);
+  align-items: flex-end;
+  margin-bottom: 1.5rem;
+}
+
+.podium-seat {
+  position: relative;
+  border-radius: 1rem;
+  background:
+    linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(25, 25, 40, 0.96));
+  border: 1px solid var(--border-strong);
+  padding: 0.9rem 0.9rem 1.1rem;
+  transform: translateY(var(--lift, 0));
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.85);
+  overflow: hidden;
+}
+
+.podium-seat.col-first {
+  --lift: -18px;
+  min-height: clamp(240px, 26vw, 270px);
+  border-color: var(--gold);
+  box-shadow: 0 0 32px rgba(255, 215, 0, 0.22), var(--shadow-soft);
+}
+
+.podium-seat.col-second {
+  --lift: -8px;
+  min-height: clamp(200px, 22vw, 230px);
+  border-color: var(--silver);
+}
+
+.podium-seat.col-third {
+  --lift: -4px;
+  min-height: clamp(190px, 20vw, 220px);
+  border-color: var(--bronze);
+}
+
+.rank-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 50%;
+  background: #000;
+  border: 2px solid #333;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+
+.crown {
+  display: block;
+  margin-top: 0.3rem;
+  margin-bottom: 0.1rem;
+  text-align: center;
+  font-size: clamp(2.1rem, 5vw, 2.6rem);
+}
+
+.podium-seat .username {
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 0.25rem;
+  word-break: break-word;
+}
+
+/* Podium stat rows (Total Wager / Prize) */
+.podium-stats {
+  margin-top: 0.5rem;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.stat-block {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.6rem;
+  font-size: 0.86rem;
+}
+
+.stat-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-subtle);
+}
+
+.stat-value {
+  font-weight: 600;
+}
+
+.prize-value {
+  color: var(--accent);
+  font-weight: 800;
+}
+
+/* Ranks 4–10 grid */
+.others-inline {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.others-inline li {
+  position: relative;
+  min-height: 180px; /* allow auto growth so labels + values never clip */
+  border-radius: 1rem;
+  background:
+    linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(18, 18, 30, 0.96));
+  border: 1px solid var(--border-subtle);
+  padding: 1.4rem 0.85rem 0.95rem; /* extra top padding so rank badge never overlaps username */
+  display: grid;
+  align-content: flex-start;
+  gap: 0.25rem;
+  transform: translateY(0);
+  transition:
+    transform 0.14s ease,
+    box-shadow 0.14s ease,
+    filter 0.14s ease;
+}
+
+.others-inline li:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+  filter: brightness(1.03);
+}
+
+.others-inline .position {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  border-radius: var(--radius-pill);
+  padding: 0.1rem 0.55rem;
+  font-size: 0.78rem;
+  border: 1px solid var(--border-strong);
+  background: #000;
+  font-weight: 700;
+}
+
+.others-inline .username {
+  font-weight: 700;
+  word-break: break-word;
+  margin-top: 0.45rem; /* ensures text clears the badge */
+}
+
+/* Reuse stat-block for 4–10 rows */
+.others-inline .stat-block {
+  margin-top: 0.4rem;
+}
+
+.fade-in {
+  animation: fadeIn 0.35s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   Race info block (under leaderboard)
+   ============================================================ */
+
+.race-info-inline {
+  margin-top: 1.5rem;
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(circle at 0 0, rgba(82, 255, 51, 0.16), transparent 60%),
+    var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-soft);
+  padding: 1.2rem 1.3rem 1.3rem;
+}
+
+.race-info-inline h3 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.race-meta {
+  font-size: 0.86rem;
+  color: var(--text-subtle);
+}
+
+.race-meta.disclaimer {
+  margin-top: 0.6rem;
+  font-size: 0.8rem;
+}
+
+/* ============================================================
    Footer
    ============================================================ */
 
@@ -794,7 +741,6 @@ a:hover {
 
 .footer-links a {
   color: var(--text-subtle);
-  text-decoration: none;
 }
 
 .footer-links a:hover {
@@ -816,30 +762,21 @@ a:hover {
   color: var(--text-main);
 }
 
-/* ============================================================
-   404 page tweaks (template-scoped styles only)
-   - The 404.html has its own inline styles; these are only
-     useful if that page chooses to load style.css as well.
-   ============================================================ */
-
-.error-404 {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
+.footer-disclaimer {
+  font-size: 0.78rem;
 }
 
 /* ============================================================
-   Responsive adjustments
+   Responsive tweaks
    ============================================================ */
 
 @media (max-width: 960px) {
-  .hero-layout,
-  .race-layout {
+  .hero-layout {
     grid-template-columns: minmax(0, 1fr);
   }
 
   .hero-panel {
-    order: -1;
+    order: -1; /* show status/card above copy on mobile */
   }
 
   .podium-olympic {
@@ -856,8 +793,9 @@ a:hover {
     padding-block: 2.1rem 1.4rem;
   }
 
-  .race-layout {
-    gap: 1.1rem;
+  .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .others-inline {
@@ -866,11 +804,6 @@ a:hover {
 
   .time-pill {
     min-width: 70px;
-  }
-
-  .hero-actions {
-    flex-direction: column;
-    align-items: stretch;
   }
 
   .footer-inner {
