@@ -297,7 +297,7 @@ a:hover {
 .live-status {
   display: flex;
   align-items: center;
-  justify-content: space-between;   /* main info left, button right */
+  justify-content: space-between;
   gap: 1rem;
   padding: 0.7rem 1.1rem 0.7rem 0.7rem;
   border-radius: var(--radius-pill);
@@ -420,12 +420,12 @@ a:hover {
 /* Single-row countdown, no vertical wrapping */
 .countdown-wrap {
   display: flex;
-  flex-wrap: nowrap;          /* keep one row */
+  flex-wrap: nowrap;
   justify-content: space-between;
   align-items: stretch;
   gap: 0.5rem;
   white-space: nowrap;
-  overflow-x: auto;           /* last resort on very small screens */
+  overflow-x: auto;
   padding-bottom: 0.1rem;
 }
 
@@ -533,7 +533,7 @@ a:hover {
 }
 
 /* ============================================================
-   Leaderboard (top 10)
+   Leaderboard (top 3 + others)
    ============================================================ */
 
 .race-section {
@@ -692,20 +692,19 @@ a:hover {
 }
 
 /* ============================================================
-   Positions 4–10 — uniform FAANG-style grid
+   Positions 4–11 — uniform FAANG-style grid
    ============================================================ */
 
 /*
- * Clean responsive grid:
- * - Desktop: 3 cards per row (auto-fit to width)
- * - Tablet: 2 cards per row
- * - Mobile: 1 card per row
- * The browser figures this out automatically based on 260px min width.
+ * Clean responsive grid for ranks 4–11 (eight cards total).
+ * - Desktop: typically 4 columns (220px min width) -> 4x2 grid
+ * - Tablet: 3 or 2 columns depending on viewport
+ * - Mobile: 1–2 columns
  */
 .others-inline {
   list-style: none;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1rem;
 }
 

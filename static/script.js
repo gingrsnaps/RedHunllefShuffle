@@ -1,9 +1,7 @@
 (() => {
   'use strict';
 
-  /**
-   * Lightweight DOM helper
-   */
+  // Small helper for selecting elements
   const $ = (sel, root = document) => root.querySelector(sel);
 
   // Core DOM references
@@ -19,7 +17,7 @@
   const ss = $('#ss');
   const yearOut = $('#year');
 
-  // Prize table – easy to adjust between races
+  // Prize table – now includes rank 11 with $0.00
   const PRIZES = {
     1: '$1,000.00',
     2: '$500.00',
@@ -30,7 +28,8 @@
     7: '$50.00',
     8: '$40.00',
     9: '$25.00',
-    10: '$10.00'
+    10: '$10.00',
+    11: '$0.00'
   };
 
   function moneyToNumber(value) {
@@ -106,12 +105,14 @@
       wagerNum: moneyToNumber(entry?.wager)
     }));
 
+    // Sort descending by wager
     norm.sort((a, b) => b.wagerNum - a.wagerNum);
 
     const first  = norm[0] || { username: '--', wagerStr: '$0.00' };
     const second = norm[1] || { username: '--', wagerStr: '$0.00' };
     const third  = norm[2] || { username: '--', wagerStr: '$0.00' };
 
+    // Render as 2–1–3 to give first place the center column prominence
     const seats = [
       { place: 2, cls: 'col-second', medal: '🥈', entry: second },
       { place: 1, cls: 'col-first',  medal: '🥇', entry: first  },
@@ -144,7 +145,7 @@
     });
   }
 
-  /* =====================  RANKS 4–10  ===================== */
+  /* =====================  RANKS 4–11  ===================== */
 
   function buildOthers(othersRaw) {
     if (!othersEl) return;
@@ -163,7 +164,7 @@
       return;
     }
 
-    // Use provided ranks if present; otherwise sort by wager and assign 4–10
+    // If ranks are pre-assigned by backend, trust them; otherwise assign 4–11
     if (rows.every((r) => typeof r.rank === 'number')) {
       rows.sort((a, b) => a.rank - b.rank);
     } else {
@@ -171,7 +172,8 @@
       rows = rows.map((row, index) => ({ ...row, rank: 4 + index }));
     }
 
-    const desired = 7; // 4–10
+    // We want exactly ranks 4–11 on the board (8 entries)
+    const desired = 8; // 4,5,6,7,8,9,10,11
     if (rows.length < desired) {
       const pad = Array.from({ length: desired - rows.length }, (_, idx) => ({
         rank: 4 + rows.length + idx,
@@ -184,8 +186,7 @@
       rows = rows.slice(0, desired);
     }
 
-    // Uniform FAANG-style grid: cards are just rendered in rank order,
-    // CSS handles layout with repeat(auto-fit, minmax(...)).
+    // Render uniform cards; CSS handles grid layout
     othersEl.innerHTML = rows
       .map((row) => {
         const prize = PRIZES[row.rank] ?? '$0.00';
@@ -207,7 +208,7 @@
       .join('');
   }
 
-  /* =====================  NETWORK  ===================== */
+  /* =====================  NETWORK CALLS  ===================== */
 
   async function fetchData() {
     try {
@@ -303,7 +304,7 @@
     setInterval(update, 1000);
   }
 
-  /* =====================  BOOT  ===================== */
+  /* =====================  BOOTSTRAP  ===================== */
 
   async function boot() {
     if (yearOut) {
