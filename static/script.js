@@ -122,9 +122,8 @@
 
   /**
    * Render the podium (Top 3).
-   * Works entirely from the public /data payload, which already
-   * censors usernames with asterisks. The backend logs full
-   * usernames server-side for auditing / prize verification.
+   * Works entirely from the public /data payload, which should already
+   * censor usernames for display. Backend logs full usernames separately.
    *
    * @param {Array<{username: string, wager: string}>} podiumRaw
    */
