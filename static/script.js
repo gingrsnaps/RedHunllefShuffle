@@ -164,7 +164,6 @@
       const el = document.createElement('article');
       el.className = `podium-seat ${cls} fade-in`;
 
-      // Each podium card shows: username, Total Wager, Prize.
       el.innerHTML = `
         <div class="rank-badge">#${place}</div>
         <span class="crown" aria-hidden="true">${medal}</span>
@@ -267,8 +266,6 @@
       buildPodium(payload.podium || []);
       buildOthers(payload.others || []);
 
-      // Structured debug logging so raw entries (including any full usernames or IP fields)
-      // are visible in the browser console without affecting the UI.
       debugLogLeaderboard(payload);
     } catch (error) {
       console.error('[leaderboard] failed', error);
@@ -316,7 +313,6 @@
 
       debugLogStream(data);
     } catch (error) {
-      // Do not spam the user on transient errors; keep pill in "unknown".
       liveEl.classList.remove('live', 'off');
       liveEl.classList.add('unk');
       if (liveText) liveText.textContent = 'Unable to reach Kick API';
@@ -372,10 +368,9 @@
       yearOut.textContent = new Date().getFullYear();
     }
 
-    let refreshMs = 60_000;  // fallback refresh cadence
+    let refreshMs = 60_000;
     let endTime   = null;
 
-    // Pull config once: start_time, end_time, refresh_seconds
     try {
       const response = await fetch('/config', { cache: 'no-store' });
       if (!response.ok) throw new Error(`config status ${response.status}`);
@@ -396,14 +391,11 @@
       console.warn('[config] failed, using defaults', error);
     }
 
-    // Countdown uses the endTime from config (if available)
     setupCountdown(endTime);
 
-    // Initial paint
     fetchData();
     fetchStream();
 
-    // Background refresh in sync with backend cache refresh
     setInterval(fetchData, refreshMs);
     setInterval(fetchStream, refreshMs);
   }

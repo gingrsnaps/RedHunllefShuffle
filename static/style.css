@@ -62,8 +62,8 @@ a:hover {
   text-decoration: none;
 }
 
+/* Container slightly wider so layout doesn’t feel tiny */
 .container {
-  /* Slightly wider to avoid “tiny” feel on large screens */
   width: min(1280px, 94%);
   margin-inline: auto;
 }
@@ -74,7 +74,7 @@ a:hover {
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
-  padding: 0.85rem 1.6rem; /* a bit larger for easier tapping */
+  padding: 0.85rem 1.6rem;
   border-radius: var(--radius-pill);
   border: 1px solid transparent;
   font-weight: 600;
@@ -162,7 +162,7 @@ a:hover {
   transform-origin: bottom center;
 }
 
-/* Explicit logo bounce for a subtle "alive" feel */
+/* Bouncing logo animation */
 @keyframes logo-bounce {
   0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
   40% { transform: translateY(-7px); }
@@ -174,7 +174,6 @@ a:hover {
   height: 100%;
 }
 
-/* Brand text */
 .brand-text {
   display: flex;
   flex-direction: column;
@@ -213,7 +212,6 @@ a:hover {
   .nav {
     gap: 1rem;
   }
-
   .nav-links {
     display: none;
   }
@@ -260,7 +258,7 @@ a:hover {
   color: var(--text-subtle);
 }
 
-/* NCPG link styling – explicitly underlined even though global links are not */
+/* NCPG link stays underlined so it looks like a policy link */
 .hero-footnote .responsible-link {
   color: var(--accent);
   font-weight: 600;
@@ -272,7 +270,7 @@ a:hover {
   filter: brightness(1.05);
 }
 
-/* Hero right-side status panel */
+/* Hero right-side card */
 .hero-panel {
   border-radius: var(--radius-lg);
   background:
@@ -288,7 +286,7 @@ a:hover {
     box-shadow 0.2s ease;
 }
 
-/* Slight lift on hover for a more dynamic feel */
+/* Slight hover lift to make the panel feel dynamic */
 .hero-panel:hover {
   transform: translateY(-2px);
   box-shadow: 0 26px 70px rgba(0, 0, 0, 0.9);
@@ -352,7 +350,7 @@ a:hover {
   color: var(--text-main);
 }
 
-/* Watch on Kick button inside live status – more prominent */
+/* Watch on Kick button inside the live pill – primary visual target */
 .live-cta {
   margin-left: 0.55rem;
   padding: 0.4rem 0.9rem;
@@ -386,7 +384,7 @@ a:hover {
   animation: countdown-breathe 4.5s ease-in-out infinite;
 }
 
-/* Very subtle breathing animation for the countdown container */
+/* Subtle breathing effect to keep it feeling “live” */
 @keyframes countdown-breathe {
   0%, 100% { box-shadow: 0 0 0 rgba(82, 255, 51, 0.0); }
   50%      { box-shadow: 0 0 30px rgba(82, 255, 51, 0.25); }
@@ -401,14 +399,24 @@ a:hover {
   margin-bottom: 0.75rem;
 }
 
+/*
+ * Countdown layout:
+ * - Desktop: four pills in a row with separators (flex, no wrap needed).
+ * - When the panel gets narrow, flex-wrap kicks in so pills move to
+ *   two rows instead of being cut off (this is what fixes your screenshot).
+ */
 .countdown-wrap {
-  display: inline-flex;
+  display: flex;
+  flex-wrap: wrap;          /* allow wrapping to new line when narrow */
+  justify-content: center;  /* center the group, looks good on all sizes */
   align-items: stretch;
   gap: 0.7rem;
+  max-width: 100%;          /* never overflow hero-panel width */
 }
 
+/* Slightly smaller minimum width so four pills can fit at more widths */
 .time-pill {
-  min-width: 90px;
+  min-width: 80px;
   padding: 0.7rem 0.9rem;
   border-radius: 1.1rem;
   background: radial-gradient(circle at top, rgba(255, 255, 255, 0.06), transparent 55%),
@@ -435,6 +443,14 @@ a:hover {
   place-items: center;
   opacity: 0.55;
   font-weight: 800;
+}
+
+/* On mid-size screens, hide separators to avoid horizontal crowding
+   – pills wrap nicely into a 2x2 grid. */
+@media (max-width: 880px) {
+  .countdown-wrap .sep {
+    display: none;
+  }
 }
 
 .countdown-caption {
@@ -544,7 +560,7 @@ a:hover {
     box-shadow 0.2s ease;
 }
 
-/* Main card also lifts slightly on hover */
+/* Main card lift */
 .leaderboard-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 26px 70px rgba(0, 0, 0, 0.9);
@@ -671,12 +687,12 @@ a:hover {
 
 .others-inline li {
   position: relative;
-  min-height: 190px; /* allow auto growth so labels + values never clip */
+  min-height: 190px;
   border-radius: 1.1rem;
   background:
     linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(18, 18, 30, 0.96));
   border: 1px solid var(--border-subtle);
-  padding: 1.5rem 0.95rem 1.05rem; /* extra top padding so rank badge never overlaps username */
+  padding: 1.5rem 0.95rem 1.05rem;
   display: grid;
   align-content: flex-start;
   gap: 0.3rem;
@@ -708,7 +724,7 @@ a:hover {
 .others-inline .username {
   font-weight: 700;
   word-break: break-word;
-  margin-top: 0.5rem; /* ensures text clears the badge */
+  margin-top: 0.5rem;
 }
 
 /* Reuse stat-block for 4–10 rows */
@@ -849,8 +865,9 @@ a:hover {
     grid-template-columns: minmax(0, 1fr);
   }
 
+  /* On very small phones, shrink pill min-width even more */
   .time-pill {
-    min-width: 80px;
+    min-width: 70px;
   }
 
   .footer-inner {
