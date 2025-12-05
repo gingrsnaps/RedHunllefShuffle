@@ -1,8 +1,12 @@
 (() => {
   'use strict';
 
+  /**
+   * Lightweight DOM helper
+   */
   const $ = (sel, root = document) => root.querySelector(sel);
 
+  // Core DOM references
   const podiumEl   = $('#podium');
   const othersEl   = $('#others-list');
   const liveEl     = $('#liveStatus');
@@ -15,7 +19,7 @@
   const ss = $('#ss');
   const yearOut = $('#year');
 
-  // Frontend prize table – easy to edit
+  // Prize table – easy to adjust between races
   const PRIZES = {
     1: '$1,000.00',
     2: '$500.00',
@@ -180,13 +184,13 @@
       rows = rows.slice(0, desired);
     }
 
-    // Bowling pin layout uses rank-4 .. rank-10 classes for CSS grid-areas
+    // Uniform FAANG-style grid: cards are just rendered in rank order,
+    // CSS handles layout with repeat(auto-fit, minmax(...)).
     othersEl.innerHTML = rows
       .map((row) => {
         const prize = PRIZES[row.rank] ?? '$0.00';
-        const rankClass = `rank-${row.rank}`;
         return `
-          <li class="fade-in ${rankClass}">
+          <li class="fade-in">
             <span class="position">#${row.rank}</span>
             <div class="username" title="${row.username}">${row.username}</div>
             <div class="stat-block">
