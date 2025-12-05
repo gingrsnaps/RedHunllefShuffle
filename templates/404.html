@@ -4,28 +4,84 @@
   <meta charset="UTF-8" />
   <title>404 – Page Not Found</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!--
+    Standalone 404 page. This uses inline styles so that it works
+    even if the main CSS bundle fails to load.
+  -->
   <style>
-    :root { --accent:#52ff33; --bg:#0f0f0f; --fg:#e1e1e1; --muted:#a1a1a1; }
-    * { box-sizing:border-box; margin:0; padding:0; }
-    body {
-      min-height:100vh; display:flex; align-items:center; justify-content:center;
-      background: radial-gradient(1200px 600px at 80% -10%, #1f1f1f 10%, transparent 60%),
-                  linear-gradient(135deg, #0f0f0f, #1a1a1a);
-      color:var(--fg); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      text-align:center;
+    :root {
+      --accent: #52ff33;
+      --bg: #050509;
+      --fg: #f5f5f7;
+      --muted: #a5a5b0;
     }
-    h1 { font-size: clamp(3rem, 10vw, 6rem); color:var(--accent); font-weight:900; letter-spacing:-.02em; }
-    p  { margin: 1rem 0 2rem; color:var(--muted); font-size:1.125rem; }
-    a  { display:inline-block; padding:.9rem 1.6rem; border-radius:999px; background:var(--accent); color:#111;
-         text-decoration:none; font-weight:800; box-shadow:0 8px 28px rgba(82,255,51,.2); transition: transform .15s ease; }
-    a:hover { transform: translateY(-2px); }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 0% 0%, #27273a 0, transparent 55%),
+        radial-gradient(circle at 100% 100%, #11111f 0, transparent 55%),
+        linear-gradient(135deg, #050509, #050507);
+      color: var(--fg);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      text-align: center;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    main {
+      padding: 2rem;
+      max-width: 480px;
+      border-radius: 1.5rem;
+      background: rgba(6, 6, 12, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);
+    }
+
+    h1 {
+      font-size: clamp(3rem, 8vw, 4rem);
+      line-height: 1;
+      margin-bottom: 0.75rem;
+    }
+
+    p {
+      margin-bottom: 1.6rem;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.8rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent), #83ff69);
+      color: #041204;
+      font-weight: 700;
+      text-decoration: none;
+      box-shadow: 0 16px 40px rgba(82, 255, 51, 0.28);
+      transition: transform 0.15s ease, filter 0.15s ease;
+    }
+
+    a:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.02);
+    }
   </style>
 </head>
 <body>
   <main>
     <h1>404</h1>
-    <p>Looks like you got lost in the wager race.</p>
-    <a href="/">Return Home</a>
+    <p>Looks like you stepped outside the wager race.</p>
+    <a href="/">Back to the leaderboard</a>
   </main>
 </body>
 </html>

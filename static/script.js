@@ -1,231 +1,300 @@
 (() => {
+  'use strict';
+
+  /**
+   * Lightweight DOM helper
+   * @param {string} sel - CSS selector
+   * @param {ParentNode} [root=document] - optional parent node
+   */
   const $ = (sel, root = document) => root.querySelector(sel);
 
+  // Core DOM references used by the leaderboard + chrome
   const podiumEl   = $('#podium');
   const othersEl   = $('#others-list');
   const liveEl     = $('#liveStatus');
   const viewerChip = liveEl?.querySelector('.viewer-chip');
-  const text       = liveEl?.querySelector('.text');
+  const liveText   = liveEl?.querySelector('.text');
 
-  const dd = $('#dd'), hh = $('#hh'), mm = $('#mm'), ss = $('#ss');
+  const dd = $('#dd');
+  const hh = $('#hh');
+  const mm = $('#mm');
+  const ss = $('#ss');
   const yearOut = $('#year');
 
-// Prize table
+  // ===========================================================
+  // Prize table (must match backend / visual card)
+  // ===========================================================
+  const PRIZES = {
+    1: '$1,000.00',
+    2: '$500.00',
+    3: '$300.00',
+    4: '$200.00',
+    5: '$150.00',
+    6: '$75.00',
+    7: '$50.00',
+    8: '$40.00',
+    9: '$25.00',
+    10: '$10.00'
+  };
 
-const PRIZES = {
-  1: '$1,000.00',
-  2: '$500.00',
-  3: '$300.00',
-  4: '$200.00',
-  5: '$150.00',
-  6: '$75.00',
-  7: '$50.00',
-  8: '$40.00',
-  9: '$25.00',
-  10: '$10.00'
-};
-
-
-
-  /** Convert a currency string to a number */
-  function moneyToNumber(s) {
-    if (typeof s === 'number') return s;
-    if (!s) return 0;
-    const n = parseFloat(String(s).replace(/[^0-9.]/g, ''));
-    return isNaN(n) ? 0 : n;
+  /**
+   * Convert currency string ("$1,234.56") to a numeric value.
+   * Used only for sorting – the formatted string is preserved.
+   */
+  function moneyToNumber(value) {
+    if (typeof value === 'number') return value;
+    if (!value) return 0;
+    const n = parseFloat(String(value).replace(/[^0-9.]/g, ''));
+    return Number.isNaN(n) ? 0 : n;
   }
 
-  /** Format integer with commas */
-  function fmtInt(n) {
-    return (n ?? 0).toLocaleString();
-  }
-
-  /** Podium with 1st place in the MIDDLE (Olympics style) */
+  /**
+   * Render the podium (Top 3). This keeps the visual layout
+   * but works entirely from the public /data payload, which
+   * already censors usernames with asterisks. The backend
+   * still logs full names to its own console.
+   *
+   * @param {Array<{username: string, wager: string}>} podiumRaw
+   */
   function buildPodium(podiumRaw) {
-    // Normalize and sort by wager descending
-    const norm = (podiumRaw || []).map(e => ({
-      username: e?.username ?? '--',
-      wagerStr: e?.wager ?? '$0.00',
-      wagerNum: moneyToNumber(e?.wager)
+    if (!podiumEl) return;
+
+    const items = Array.isArray(podiumRaw) ? podiumRaw : [];
+
+    if (!items.length) {
+      podiumEl.innerHTML =
+        '<p class="section-subtitle">No wagers yet. As soon as the race starts, the top three will appear here.</p>';
+      return;
+    }
+
+    // Normalize + sort by wager descending
+    const norm = items.map((entry) => ({
+      username: entry?.username ?? '--',
+      wagerStr: entry?.wager ?? '$0.00',
+      wagerNum: moneyToNumber(entry?.wager)
     }));
+
     norm.sort((a, b) => b.wagerNum - a.wagerNum);
 
-    // Top 3 after sorting
     const first  = norm[0] || { username: '--', wagerStr: '$0.00' };
     const second = norm[1] || { username: '--', wagerStr: '$0.00' };
     const third  = norm[2] || { username: '--', wagerStr: '$0.00' };
 
-    // Render order = [second, first, third] to place 1st at the center column
+    // Render in order: [2nd, 1st, 3rd] so 1st is centered
     const seats = [
       { place: 2, cls: 'col-second', medal: '🥈', entry: second },
       { place: 1, cls: 'col-first',  medal: '🥇', entry: first  },
-      { place: 3, cls: 'col-third',  medal: '🥉', entry: third  },
+      { place: 3, cls: 'col-third',  medal: '🥉', entry: third  }
     ];
 
     podiumEl.innerHTML = '';
-    seats.forEach(s => {
+    seats.forEach((seat) => {
+      const { place, cls, medal, entry } = seat;
       const el = document.createElement('article');
-      el.className = `podium-seat ${s.cls} fade-in`;
+      el.className = `podium-seat ${cls} fade-in`;
+
       el.innerHTML = `
-        <span class="rank-badge">${s.place}</span>
-        <div class="crown">${s.medal}</div>
-        <div class="user">${s.entry.username}</div>
-        <div class="label">WAGERED</div>
-        <div class="wager">${s.entry.wagerStr}</div>
-        <div class="label">PRIZE</div>
-        <div class="prize">${PRIZES[s.place]}</div>
+        <div class="rank-badge">#${place}</div>
+        <span class="crown" aria-hidden="true">${medal}</span>
+        <div class="username" title="${entry.username}">${entry.username}</div>
+        <span class="label">Total Wager</span>
+        <div class="wager">${entry.wagerStr}</div>
+        <div class="prize">${PRIZES[place] ?? '$0.00'}</div>
       `;
+
       podiumEl.appendChild(el);
     });
   }
 
-  /** Build placements 4–10. If absent, use wager DESC and assign ranks. */
+  /**
+   * Render the rows for ranks 4–10.
+   * The backend may send explicit rank; if not, we derive it.
+   *
+   * @param {Array<{rank?: number, username: string, wager: string}>} othersRaw
+   */
   function buildOthers(othersRaw) {
-    let others = (othersRaw || []).map(e => ({
-      rank: typeof e?.rank === 'number' ? e.rank : null,
-      username: e?.username ?? '--',
-      wagerStr: e?.wager ?? '$0.00',
-      wagerNum: moneyToNumber(e?.wager)
-    }));
+    if (!othersEl) return;
 
-    if (others.length === 0) {
+    let rows = Array.isArray(othersRaw)
+      ? othersRaw.map((entry) => ({
+          rank: typeof entry?.rank === 'number' ? entry.rank : null,
+          username: entry?.username ?? '--',
+          wagerStr: entry?.wager ?? '$0.00',
+          wagerNum: moneyToNumber(entry?.wager)
+        }))
+      : [];
+
+    if (!rows.length) {
       othersEl.innerHTML = '';
       return;
     }
 
-    // If rank is provided, sort ascending by rank; else sort by wager desc then rank 4..10
-    if (others.every(o => typeof o.rank === 'number')) {
-      others.sort((a, b) => a.rank - b.rank);
+    // Use provided rank if present, else sort by wager and assign 4..10
+    if (rows.every((r) => typeof r.rank === 'number')) {
+      rows.sort((a, b) => a.rank - b.rank);
     } else {
-      others.sort((a, b) => b.wagerNum - a.wagerNum);
-      others = others.map((o, idx) => ({ ...o, rank: 4 + idx }));
+      rows.sort((a, b) => b.wagerNum - a.wagerNum);
+      rows = rows.map((row, index) => ({ ...row, rank: 4 + index }));
     }
 
-    // Ensure exactly 7 items (4..10)
+    // Clamp to 7 rows (4–10). Pad blanks if necessary.
     const desired = 7;
-    if (others.length < desired) {
-      const pad = Array.from({ length: desired - others.length }, (_, i) => ({
-        rank: 4 + others.length + i,
+    if (rows.length < desired) {
+      const pad = Array.from({ length: desired - rows.length }, (_, idx) => ({
+        rank: 4 + rows.length + idx,
         username: '--',
         wagerStr: '$0.00',
         wagerNum: 0
       }));
-      others = others.concat(pad);
-    } else if (others.length > desired) {
-      others = others.slice(0, desired);
+      rows = rows.concat(pad);
+    } else if (rows.length > desired) {
+      rows = rows.slice(0, desired);
     }
 
-    othersEl.innerHTML = others.map(o => `
-      <li class="fade-in">
-        <span class="position">#${o.rank}</span>
-        <div class="username">${o.username}</div>
-        <div class="label emphasized">WAGER</div>
-        <div class="wager">${o.wagerStr}</div>
-        <div class="prize">${PRIZES[o.rank] || '$0.00'}</div>
-      </li>
-    `).join('');
+    othersEl.innerHTML = rows
+      .map((row) => {
+        const prize = PRIZES[row.rank] ?? '$0.00';
+        return `
+          <li class="fade-in">
+            <span class="position">#${row.rank}</span>
+            <div class="username" title="${row.username}">${row.username}</div>
+            <div class="label emphasized">Wager</div>
+            <div class="wager">${row.wagerStr}</div>
+            <div class="prize">${prize}</div>
+          </li>
+        `;
+      })
+      .join('');
   }
 
-  /** Pull leaderboard data and render */
+  // ===========================================================
+  // Network helpers
+  // ===========================================================
+
+  /**
+   * Pull leaderboard data from /data and render podium + others.
+   */
   async function fetchData() {
     try {
-      const r = await fetch('/data', { cache: 'no-store' });
-      if (!r.ok) throw new Error(`data status ${r.status}`);
-      const j = await r.json();
-      buildPodium(j.podium || []);
-      buildOthers(j.others || []);
-      console.info('[leaderboard] updated', j);
-    } catch (e) {
-      console.error('[leaderboard] failed', e);
+      const response = await fetch('/data', { cache: 'no-store' });
+      if (!response.ok) throw new Error(`data status ${response.status}`);
+      const payload = await response.json();
+
+      buildPodium(payload.podium || []);
+      buildOthers(payload.others || []);
+
+      // This only logs the public (censored) payload to the browser console.
+      // Full usernames are logged by the backend itself.
+      console.info('[leaderboard] updated', payload);
+    } catch (error) {
+      console.error('[leaderboard] failed', error);
     }
   }
 
-  /** Live badge + viewer count when available */
+  /**
+   * Update the live status pill from /stream.
+   * Backend returns: { live: bool, title: str|None, viewers: int|None }
+   */
   async function fetchStream() {
     if (!liveEl) return;
-    try {
-      const r = await fetch('/stream', { cache: 'no-store' });
-      if (!r.ok) throw new Error(`stream status ${r.status}`);
-      const j = await r.json();
-      const live = !!j.live;
-      const viewers = j.viewers ?? null;
 
+    try {
+      const response = await fetch('/stream', { cache: 'no-store' });
+      if (!response.ok) throw new Error(`stream status ${response.status}`);
+
+      const data = await response.json();
+
+      // Reset classes
       liveEl.classList.remove('live', 'off', 'unk');
-      if (live) {
+
+      if (data.live === true) {
         liveEl.classList.add('live');
-        text.textContent = 'LIVE NOW!';
-        if (typeof viewers === 'number') {
-          viewerChip.style.display = 'inline-flex';
-          viewerChip.textContent = `${fmtInt(viewers)} watching`;
-        } else {
-          viewerChip.style.display = 'none';
+        if (liveText) {
+          liveText.textContent = data.title
+            ? `Live on Kick — ${data.title}`
+            : 'Live on Kick';
         }
-      } else {
+
+        if (viewerChip && typeof data.viewers === 'number') {
+          viewerChip.style.display = 'inline-flex';
+          const countNode = viewerChip.querySelector('.count');
+          if (countNode) countNode.textContent = data.viewers.toLocaleString();
+        }
+      } else if (data.live === false) {
         liveEl.classList.add('off');
-        text.textContent = 'Offline';
-        viewerChip.style.display = 'none';
+        if (liveText) liveText.textContent = 'Currently offline';
+        if (viewerChip) viewerChip.style.display = 'none';
+      } else {
+        liveEl.classList.add('unk');
+        if (liveText) liveText.textContent = 'Checking stream status…';
+        if (viewerChip) viewerChip.style.display = 'none';
       }
-      console.info('[stream] status', j);
-    } catch (e) {
+
+      console.info('[stream] status', data);
+    } catch (error) {
+      // Do not spam the user on transient errors; keep pill in "unknown".
       liveEl.classList.remove('live', 'off');
       liveEl.classList.add('unk');
-      text.textContent = 'Status unavailable';
-      viewerChip.style.display = 'none';
-      console.warn('[stream] failed', e);
+      if (liveText) liveText.textContent = 'Unable to reach Kick API';
+      if (viewerChip) viewerChip.style.display = 'none';
+      console.warn('[stream] failed', error);
     }
   }
 
-  /** Countdown driven by /config (end_time epoch seconds) */
+  /**
+   * Initialize the countdown timer based on /config.
+   * We only need the end time; the backend controls the current race window.
+   */
   async function initCountdown() {
-    try {
-      const r = await fetch('/config', { cache: 'no-store' });
-      if (!r.ok) throw new Error(`config status ${r.status}`);
-      const j = await r.json();
-      const end = Number(j.end_time) || 0;
+    if (!dd || !hh || !mm || !ss) return;
 
-      function tick() {
+    try {
+      const response = await fetch('/config', { cache: 'no-store' });
+      if (!response.ok) throw new Error(`config status ${response.status}`);
+
+      const config = await response.json();
+      const end = Number(config.end_time) || 0;
+
+      const update = () => {
         const now = Math.floor(Date.now() / 1000);
         let delta = Math.max(0, end - now);
 
-        const d = Math.floor(delta / 86400); delta -= d * 86400;
-        const h = Math.floor(delta / 3600);  delta -= h * 3600;
-        const m = Math.floor(delta / 60);    delta -= m * 60;
-        const s = delta;
+        const days = Math.floor(delta / 86400); delta -= days * 86400;
+        const hours = Math.floor(delta / 3600); delta -= hours * 3600;
+        const mins = Math.floor(delta / 60);    delta -= mins * 60;
+        const secs = delta;
 
-        dd.textContent = String(d).padStart(2, '0');
-        hh.textContent = String(h).padStart(2, '0');
-        mm.textContent = String(m).padStart(2, '0');
-        ss.textContent = String(s).padStart(2, '0');
-      }
+        dd.textContent = String(days).padStart(2, '0');
+        hh.textContent = String(hours).padStart(2, '0');
+        mm.textContent = String(mins).padStart(2, '0');
+        ss.textContent = String(secs).padStart(2, '0');
+      };
 
-      tick();
-      setInterval(tick, 1000);
-    } catch (e) {
-      console.warn('[countdown] failed', e);
+      update();
+      setInterval(update, 1000);
+    } catch (error) {
+      console.warn('[countdown] failed', error);
     }
   }
 
-  /** Boot */
-  function boot() {
-    if (yearOut) yearOut.textContent = new Date().getFullYear();
+  // ===========================================================
+  // Boot
+  // =========================================================== */
 
+  function boot() {
+    if (yearOut) {
+      yearOut.textContent = new Date().getFullYear();
+    }
+
+    // Initial paint
     fetchData();
     fetchStream();
     initCountdown();
 
-    // refresh every 60s
+    // Background refresh (60s, matches REFRESH_SECONDS default)
     setInterval(fetchData, 60_000);
     setInterval(fetchStream, 60_000);
   }
 
   document.addEventListener('DOMContentLoaded', boot);
 })();
-
-
-
-
-
-
-
-
-
