@@ -89,12 +89,14 @@
         <aside class="hero-panel" aria-label="Race status">
           <!-- Live Kick status. Populated by /stream. -->
           <div id="liveStatus" class="live-status" role="status" aria-live="polite">
-            <span class="dot" aria-hidden="true"></span>
-            <span class="text">Checking stream status…</span>
-            <span class="viewer-chip">
-              <span class="label">Viewers</span>
-              <span class="count">--</span>
-            </span>
+            <div class="live-main">
+              <span class="dot" aria-hidden="true"></span>
+              <span class="text">Checking stream status…</span>
+              <span class="viewer-chip">
+                <span class="label">Viewers</span>
+                <span class="count">--</span>
+              </span>
+            </div>
             <a
               class="live-cta"
               href="https://kick.com/redhunllef"
@@ -138,7 +140,7 @@
     </section>
 
     <!-- =======================================================
-         Sponsors (high on the page)
+         Sponsors
          ======================================================= -->
     <section id="sponsors" class="sponsors">
       <div class="container sponsors-inner">
@@ -169,7 +171,7 @@
     </section>
 
     <!-- =======================================================
-         Leaderboard (top 10)
+         Leaderboard
          ======================================================= -->
     <section id="leaderboard" class="race-section">
       <div class="container">
@@ -184,7 +186,6 @@
         </div>
 
         <div class="race-layout">
-          <!-- Main leaderboard card -->
           <section class="leaderboard-card" aria-label="Top 10 leaderboard">
             <div class="helper-card">
               <p>
@@ -193,14 +194,14 @@
               </p>
             </div>
 
-            <!-- Top 3 podium (populated by script.js from /data) -->
+            <!-- Top 3 podium (populated by script.js) -->
             <div
               id="podium"
               class="podium-olympic"
               aria-label="Top 3 wagerers"
             ></div>
 
-            <!-- Ranks 4–10 (populated by script.js from /data) -->
+            <!-- Positions 4–10 (populated by script.js) -->
             <ul
               id="others-list"
               class="others-inline"
@@ -209,7 +210,6 @@
           </section>
         </div>
 
-        <!-- Terms & conditions under placements -->
         <section class="race-info-inline" aria-label="Wager race terms and conditions">
           <h3>Wager Race Terms &amp; Conditions</h3>
           <p class="race-meta">

@@ -1,14 +1,8 @@
 (() => {
   'use strict';
 
-  /**
-   * Lightweight DOM helper
-   * @param {string} sel - CSS selector
-   * @param {ParentNode} [root=document] - optional parent node
-   */
   const $ = (sel, root = document) => root.querySelector(sel);
 
-  // Core DOM references used by the leaderboard + chrome
   const podiumEl   = $('#podium');
   const othersEl   = $('#others-list');
   const liveEl     = $('#liveStatus');
@@ -21,15 +15,7 @@
   const ss = $('#ss');
   const yearOut = $('#year');
 
-  // ===========================================================
-  // Config for this race (frontend side)
-  // ===========================================================
-  // NOTE:
-  // - To change prize amounts, edit the PRIZES object below.
-  // - To change the active race window and refresh rate,
-  //   update START_TIME, END_TIME and REFRESH_SECONDS in the
-  //   backend (environment variables read in wager_backend.py).
-  //   The frontend reads refresh_seconds/end_time from /config.
+  // Frontend prize table – easy to edit
   const PRIZES = {
     1: '$1,000.00',
     2: '$500.00',
@@ -43,10 +29,6 @@
     10: '$10.00'
   };
 
-  /**
-   * Convert currency string ("$1,234.56") to a numeric value.
-   * Used only for sorting – the formatted string is preserved.
-   */
   function moneyToNumber(value) {
     if (typeof value === 'number') return value;
     if (!value) return 0;
@@ -54,10 +36,6 @@
     return Number.isNaN(n) ? 0 : n;
   }
 
-  /**
-   * Return a small "client meta" object for debug logs.
-   * (No extra dependencies, browser-only info.)
-   */
   function makeClientMeta() {
     return {
       ts: new Date().toISOString(),
@@ -67,10 +45,6 @@
     };
   }
 
-  /**
-   * Structured debug log for config.
-   * @param {object} cfg
-   */
   function debugLogConfig(cfg) {
     try {
       console.groupCollapsed('[config] loaded');
@@ -82,13 +56,6 @@
     }
   }
 
-  /**
-   * Structured debug log for leaderboard payload.
-   * Logs raw podium/others entries so any full usernames or IP fields
-   * the backend includes will show here.
-   *
-   * @param {object} payload
-   */
   function debugLogLeaderboard(payload) {
     try {
       const podiumRaw = Array.isArray(payload?.podium) ? payload.podium : [];
@@ -105,10 +72,6 @@
     }
   }
 
-  /**
-   * Structured debug log for stream payload.
-   * @param {object} data
-   */
   function debugLogStream(data) {
     try {
       console.groupCollapsed('[stream] status');
@@ -120,13 +83,8 @@
     }
   }
 
-  /**
-   * Render the podium (Top 3).
-   * Works entirely from the public /data payload, which should already
-   * censor usernames for display. Backend logs full usernames separately.
-   *
-   * @param {Array<{username: string, wager: string}>} podiumRaw
-   */
+  /* =====================  PODIUM (1–3)  ===================== */
+
   function buildPodium(podiumRaw) {
     if (!podiumEl) return;
 
@@ -138,7 +96,6 @@
       return;
     }
 
-    // Normalize + sort by wager descending
     const norm = items.map((entry) => ({
       username: entry?.username ?? '--',
       wagerStr: entry?.wager ?? '$0.00',
@@ -151,7 +108,6 @@
     const second = norm[1] || { username: '--', wagerStr: '$0.00' };
     const third  = norm[2] || { username: '--', wagerStr: '$0.00' };
 
-    // Render in the visual order: 2nd | 1st | 3rd
     const seats = [
       { place: 2, cls: 'col-second', medal: '🥈', entry: second },
       { place: 1, cls: 'col-first',  medal: '🥇', entry: first  },
@@ -184,11 +140,8 @@
     });
   }
 
-  /**
-   * Render the rows for ranks 4–10.
-   *
-   * @param {Array<{rank?: number, username: string, wager: string}>} othersRaw
-   */
+  /* =====================  RANKS 4–10  ===================== */
+
   function buildOthers(othersRaw) {
     if (!othersEl) return;
 
@@ -206,7 +159,7 @@
       return;
     }
 
-    // Use provided rank if present, else sort by wager and assign 4..10
+    // Use provided ranks if present; otherwise sort by wager and assign 4–10
     if (rows.every((r) => typeof r.rank === 'number')) {
       rows.sort((a, b) => a.rank - b.rank);
     } else {
@@ -214,8 +167,7 @@
       rows = rows.map((row, index) => ({ ...row, rank: 4 + index }));
     }
 
-    // Clamp to 7 rows (4–10). Pad blanks if necessary.
-    const desired = 7;
+    const desired = 7; // 4–10
     if (rows.length < desired) {
       const pad = Array.from({ length: desired - rows.length }, (_, idx) => ({
         rank: 4 + rows.length + idx,
@@ -228,11 +180,13 @@
       rows = rows.slice(0, desired);
     }
 
+    // Bowling pin layout uses rank-4 .. rank-10 classes for CSS grid-areas
     othersEl.innerHTML = rows
       .map((row) => {
         const prize = PRIZES[row.rank] ?? '$0.00';
+        const rankClass = `rank-${row.rank}`;
         return `
-          <li class="fade-in">
+          <li class="fade-in ${rankClass}">
             <span class="position">#${row.rank}</span>
             <div class="username" title="${row.username}">${row.username}</div>
             <div class="stat-block">
@@ -249,13 +203,8 @@
       .join('');
   }
 
-  // ===========================================================
-  // Network helpers
-  // ===========================================================
+  /* =====================  NETWORK  ===================== */
 
-  /**
-   * Pull leaderboard data from /data and render podium + others.
-   */
   async function fetchData() {
     try {
       const response = await fetch('/data', { cache: 'no-store' });
@@ -271,10 +220,6 @@
     }
   }
 
-  /**
-   * Update the live status pill from /stream.
-   * Backend returns: { live: bool, title: str|None, viewers: int|None }
-   */
   async function fetchStream() {
     if (!liveEl) return;
 
@@ -284,7 +229,6 @@
 
       const data = await response.json();
 
-      // Reset classes
       liveEl.classList.remove('live', 'off', 'unk');
 
       if (data.live === true) {
@@ -294,7 +238,6 @@
             ? `Live on Kick — ${data.title}`
             : 'Live on Kick';
         }
-
         if (viewerChip && typeof data.viewers === 'number') {
           viewerChip.style.display = 'inline-flex';
           const countNode = viewerChip.querySelector('.count');
@@ -320,10 +263,8 @@
     }
   }
 
-  /**
-   * Set up the countdown timer.
-   * @param {number|null} endTimeSeconds - Unix timestamp in seconds
-   */
+  /* =====================  COUNTDOWN  ===================== */
+
   function setupCountdown(endTimeSeconds) {
     if (!dd || !hh || !mm || !ss) return;
 
@@ -358,9 +299,7 @@
     setInterval(update, 1000);
   }
 
-  // ===========================================================
-  // Boot
-  // =========================================================== */
+  /* =====================  BOOT  ===================== */
 
   async function boot() {
     if (yearOut) {

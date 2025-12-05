@@ -1,5 +1,5 @@
 /* ============================================================
-   Global theme and reset
+   Global theme + reset
    ============================================================ */
 
 :root {
@@ -52,7 +52,6 @@ img {
   display: block;
 }
 
-/* Global links: no underlines except where we explicitly add */
 a {
   color: inherit;
   text-decoration: none;
@@ -62,13 +61,13 @@ a:hover {
   text-decoration: none;
 }
 
-/* Central content width */
 .container {
   width: min(1280px, 94%);
   margin-inline: auto;
 }
 
-/* Buttons / pills */
+/* Buttons */
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -110,7 +109,8 @@ a:hover {
   background: rgba(255, 255, 255, 0.04);
 }
 
-/* Small badge used in hero kicker */
+/* Small badge */
+
 .badge {
   display: inline-flex;
   align-items: center;
@@ -126,7 +126,7 @@ a:hover {
 }
 
 /* ============================================================
-   Header / navigation
+   Header / nav
    ============================================================ */
 
 .site-header {
@@ -162,7 +162,6 @@ a:hover {
   transform-origin: bottom center;
 }
 
-/* Bouncing logo animation */
 @keyframes logo-bounce {
   0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
   40% { transform: translateY(-7px); }
@@ -218,14 +217,13 @@ a:hover {
 }
 
 /* ============================================================
-   Hero section
+   Hero
    ============================================================ */
 
 .hero {
   padding-block: 3.1rem 2.1rem;
 }
 
-/* Align hero copy and hero panel along the top for a clean “inline” feel */
 .hero-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
@@ -234,7 +232,7 @@ a:hover {
 }
 
 .hero-heading {
-  font-size: clamp(2.2rem, 4.5vw, 3.1rem);
+  font-size: clamp(2.2rem, 4.5vw, 3.2rem);
   font-weight: 800;
   letter-spacing: -0.02em;
   margin-bottom: 0.8rem;
@@ -259,7 +257,6 @@ a:hover {
   color: var(--text-subtle);
 }
 
-/* NCPG link stays underlined so it looks like a policy link */
 .hero-footnote .responsible-link {
   color: var(--accent);
   font-weight: 600;
@@ -271,7 +268,8 @@ a:hover {
   filter: brightness(1.05);
 }
 
-/* Hero right-side card */
+/* Hero right card */
+
 .hero-panel {
   border-radius: var(--radius-lg);
   background:
@@ -287,7 +285,6 @@ a:hover {
     box-shadow 0.2s ease;
 }
 
-/* Slight hover lift to keep it feeling “alive” */
 .hero-panel:hover {
   transform: translateY(-2px);
   box-shadow: 0 26px 70px rgba(0, 0, 0, 0.9);
@@ -298,26 +295,36 @@ a:hover {
    ============================================================ */
 
 .live-status {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 0.7rem;
-  padding: 0.6rem 0.95rem 0.6rem 0.65rem;
+  justify-content: space-between;   /* main info left, button right */
+  gap: 1rem;
+  padding: 0.7rem 1.1rem 0.7rem 0.7rem;
   border-radius: var(--radius-pill);
   border: 1px solid var(--border-subtle);
   background: rgba(12, 12, 18, 0.9);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
 }
 
+.live-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
 .live-status .dot {
-  width: 0.75rem;
-  height: 0.75rem;
+  width: 0.95rem;
+  height: 0.95rem;
   border-radius: 50%;
   background: #666;
 }
 
 .live-status.live .dot {
   background: var(--danger);
-  box-shadow: 0 0 12px rgba(255, 75, 92, 0.75);
+  box-shadow:
+    0 0 14px rgba(255, 75, 92, 0.9),
+    0 0 26px rgba(255, 75, 92, 0.7);
 }
 
 .live-status.off .dot {
@@ -330,7 +337,8 @@ a:hover {
 
 .live-status .text {
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.96rem;
+  white-space: nowrap;
 }
 
 .viewer-chip {
@@ -354,18 +362,19 @@ a:hover {
   color: var(--text-main);
 }
 
-/* Watch on Kick button inside the live pill – primary visual target */
+/* Watch on Kick button – bigger & anchored to the right */
+
 .live-cta {
-  margin-left: 0.55rem;
-  padding: 0.4rem 0.9rem;
+  padding: 0.6rem 1.25rem;
   border-radius: var(--radius-pill);
-  font-size: 0.86rem;
+  font-size: 0.92rem;
   font-weight: 700;
   display: inline-flex;
   align-items: center;
   background: linear-gradient(135deg, var(--accent), #83ff69);
   color: #041204;
-  box-shadow: 0 12px 32px rgba(82, 255, 51, 0.45);
+  box-shadow: 0 14px 34px rgba(82, 255, 51, 0.5);
+  white-space: nowrap;
   transition:
     transform 0.16s ease,
     box-shadow 0.16s ease,
@@ -374,15 +383,15 @@ a:hover {
 
 .live-cta:hover {
   transform: translateY(-1px);
-  filter: brightness(1.04);
+  filter: brightness(1.05);
 }
 
 /* ============================================================
-   Countdown card
+   Countdown
    ============================================================ */
 
 .countdown-card {
-  padding: 1rem 1rem 1.1rem;
+  padding: 1rem 1.1rem 1.2rem;
   border-radius: 1.1rem;
   border: 1px solid var(--accent-soft);
   background:
@@ -391,17 +400,15 @@ a:hover {
   animation: countdown-breathe 4.5s ease-in-out infinite;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
 }
 
-/* Subtle breathing glow */
 @keyframes countdown-breathe {
   0%, 100% { box-shadow: 0 0 0 rgba(82, 255, 51, 0.0); }
   50%      { box-shadow: 0 0 30px rgba(82, 255, 51, 0.25); }
 }
 
 .countdown-title {
-  width: 100%;
   font-size: 1rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -410,20 +417,26 @@ a:hover {
   margin-bottom: 0.75rem;
 }
 
-/* Layout for the four pills */
+/*
+ * Countdown row: keep all time segments on one line.
+ * We avoid wrapping and instead shrink font/padding at breakpoints.
+ */
 .countdown-wrap {
   display: flex;
-  flex-wrap: wrap;          /* allows wrapping when narrow */
-  justify-content: center;
+  flex-wrap: nowrap;          /* never wrap; keep a single row */
+  justify-content: space-between;
   align-items: stretch;
-  gap: 0.7rem;
-  max-width: 100%;
+  gap: 0.5rem;
+  white-space: nowrap;        /* keeps labels aligned in a row */
+  overflow-x: auto;           /* last resort on tiny screens */
+  padding-bottom: 0.1rem;
 }
 
 .time-pill {
-  min-width: 80px;
-  padding: 0.7rem 0.9rem;
-  border-radius: 1.1rem;
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0.7rem 0.6rem;
+  border-radius: 1rem;
   background: radial-gradient(circle at top, rgba(255, 255, 255, 0.06), transparent 55%),
               var(--bg-soft);
   border: 1px solid var(--border-subtle);
@@ -432,7 +445,7 @@ a:hover {
 }
 
 .time-pill span {
-  font-size: 1.55rem;
+  font-size: 1.6rem;
   font-weight: 800;
 }
 
@@ -448,13 +461,7 @@ a:hover {
   place-items: center;
   opacity: 0.55;
   font-weight: 800;
-}
-
-/* Hide separators on mid-size screens so layout can wrap cleanly */
-@media (max-width: 880px) {
-  .countdown-wrap .sep {
-    display: none;
-  }
+  padding-inline: 0.1rem;
 }
 
 .countdown-caption {
@@ -483,7 +490,7 @@ a:hover {
 }
 
 .section-title-main {
-  font-size: 1.7rem; /* Leaderboard title a bit larger */
+  font-size: 1.8rem;
 }
 
 .section-subtitle {
@@ -529,7 +536,7 @@ a:hover {
 }
 
 /* ============================================================
-   Leaderboard
+   Leaderboard (top 10)
    ============================================================ */
 
 .race-section {
@@ -546,7 +553,6 @@ a:hover {
   text-align: center;
 }
 
-/* Center the main leaderboard card like a big-tech column */
 .race-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -562,7 +568,7 @@ a:hover {
     var(--bg-elevated);
   border: 1px solid var(--border-subtle);
   box-shadow: var(--shadow-soft);
-  padding: 1.6rem 1.6rem 1.9rem;
+  padding: 1.8rem 1.8rem 2rem;
   transition:
     transform 0.18s ease,
     box-shadow 0.2s ease;
@@ -575,7 +581,7 @@ a:hover {
 
 .helper-card {
   margin-bottom: 1.3rem;
-  padding: 0.75rem 0.95rem;
+  padding: 0.8rem 1rem;
   border-radius: 0.9rem;
   background: rgba(255, 255, 255, 0.02);
   border: 1px dashed var(--border-subtle);
@@ -583,34 +589,35 @@ a:hover {
   color: var(--text-subtle);
 }
 
-/* Top 3 podium — single row, inline, aligned */
+/* Top 3 – more prominent */
+
 .podium-olympic {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(0.9rem, 2.5vw, 1.4rem);
+  gap: clamp(1rem, 2.6vw, 1.5rem);
   align-items: stretch;
-  margin-bottom: 1.7rem;
+  margin-bottom: 1.9rem;
 }
 
 .podium-seat {
   position: relative;
-  border-radius: 1.1rem;
+  border-radius: 1.25rem;
   background:
-    linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(25, 25, 40, 0.96));
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.08), transparent 65%),
+    linear-gradient(to top, rgba(3, 3, 8, 0.96), rgba(18, 18, 32, 0.98));
   border: 1px solid var(--border-strong);
-  padding: 1rem 1rem 1.2rem;
-  min-height: clamp(230px, 26vw, 260px);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.85);
+  padding: 1.2rem 1.1rem 1.4rem;
+  min-height: clamp(260px, 30vw, 290px);
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.9);
   overflow: hidden;
 }
 
-/* 1st place highlight */
 .podium-seat.col-first {
   border-color: var(--gold);
   box-shadow:
-    0 0 32px rgba(255, 215, 0, 0.24),
+    0 0 40px rgba(255, 215, 0, 0.3),
     var(--shadow-soft);
-  transform: scale(1.02);
+  transform: scale(1.03);
 }
 
 .podium-seat.col-second {
@@ -623,39 +630,39 @@ a:hover {
 
 .rank-badge {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  width: 2.1rem;
-  height: 2.1rem;
+  top: 12px;
+  left: 12px;
+  width: 2.4rem;
+  height: 2.4rem;
   border-radius: 50%;
   background: #000;
   border: 2px solid #333;
   display: grid;
   place-items: center;
   font-weight: 800;
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 .crown {
   display: block;
-  margin-top: 0.35rem;
-  margin-bottom: 0.15rem;
+  margin-top: 0.45rem;
+  margin-bottom: 0.25rem;
   text-align: center;
-  font-size: clamp(2.2rem, 5.2vw, 2.8rem);
+  font-size: clamp(2.6rem, 5.5vw, 3.2rem);
 }
 
 .podium-seat .username {
   font-weight: 800;
   text-align: center;
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.35rem;
   word-break: break-word;
+  font-size: 1.02rem;
 }
 
-/* Podium stat rows (Total Wager / Prize) */
 .podium-stats {
-  margin-top: 0.6rem;
+  margin-top: 0.7rem;
   display: grid;
-  gap: 0.35rem;
+  gap: 0.4rem;
 }
 
 .stat-block {
@@ -667,21 +674,19 @@ a:hover {
 }
 
 .stat-label {
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--text-subtle);
 }
 
-/* Bigger wager / prize text to make it readable at a glance */
 .stat-value {
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 1.05rem;
 }
 
-/* Slightly larger numbers in the top-3 cards */
 .podium-seat .stat-value {
-  font-size: 1.08rem;
+  font-size: 1.16rem;
 }
 
 .prize-value {
@@ -689,12 +694,30 @@ a:hover {
   font-weight: 800;
 }
 
-/* Ranks 4–10 grid */
+/* ============================================================
+   Positions 4–10 — bowling-pin layout on desktop
+   ============================================================ */
+
+/*
+ * Desktop: 5-column grid with custom areas:
+ *
+ *   row1:      .   #4   .   .   .
+ *   row2:      .   #5   .   #6  .
+ *   row3:     #7   .   #8  .   #9
+ *   row4:      .   .   #10 .   .
+ */
 .others-inline {
   list-style: none;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.95rem;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-rows: auto auto auto auto;
+  grid-template-areas:
+    ". rank-4 . . ."
+    ". rank-5 . rank-6 ."
+    "rank-7 . rank-8 . rank-9"
+    ". . rank-10 . .";
+  gap: 1rem;
+  justify-items: stretch;
 }
 
 .others-inline li {
@@ -704,7 +727,7 @@ a:hover {
   background:
     linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(18, 18, 30, 0.96));
   border: 1px solid var(--border-subtle);
-  padding: 1.5rem 0.95rem 1.05rem;
+  padding: 1.4rem 1rem 1.1rem;
   display: grid;
   align-content: flex-start;
   gap: 0.3rem;
@@ -721,6 +744,15 @@ a:hover {
   filter: brightness(1.03);
 }
 
+/* Map each rank to its grid area */
+.others-inline .rank-4  { grid-area: rank-4; }
+.others-inline .rank-5  { grid-area: rank-5; }
+.others-inline .rank-6  { grid-area: rank-6; }
+.others-inline .rank-7  { grid-area: rank-7; }
+.others-inline .rank-8  { grid-area: rank-8; }
+.others-inline .rank-9  { grid-area: rank-9; }
+.others-inline .rank-10 { grid-area: rank-10; }
+
 .others-inline .position {
   position: absolute;
   top: 8px;
@@ -736,12 +768,11 @@ a:hover {
 .others-inline .username {
   font-weight: 700;
   word-break: break-word;
-  margin-top: 0.5rem;
+  margin-top: 0.55rem;
 }
 
-/* Larger wager/prize text for 4–10 as well */
 .others-inline .stat-value {
-  font-size: 0.98rem;
+  font-size: 1.02rem;
 }
 
 .fade-in {
@@ -754,7 +785,7 @@ a:hover {
 }
 
 /* ============================================================
-   Terms & conditions block
+   Terms block
    ============================================================ */
 
 .race-info-inline {
@@ -833,7 +864,7 @@ a:hover {
   color: var(--text-subtle);
 }
 
-/* GingrSnaps credit pops in Kick green */
+/* GingrSnaps in Kick green */
 .footer-meta a[href*="gingrsnaps"] {
   color: var(--accent);
   font-weight: 600;
@@ -848,7 +879,7 @@ a:hover {
 }
 
 /* ============================================================
-   404 page
+   404 layout
    ============================================================ */
 
 .error-body {
@@ -909,13 +940,24 @@ a:hover {
    Responsive tweaks
    ============================================================ */
 
+@media (max-width: 1100px) {
+  /* fall back from bowling-pin to simpler grid */
+  .others-inline {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-areas: none;
+  }
+  .others-inline li {
+    grid-area: auto;
+  }
+}
+
 @media (max-width: 960px) {
   .hero-layout {
     grid-template-columns: minmax(0, 1fr);
   }
 
   .hero-panel {
-    order: -1; /* status/card above copy on mobile */
+    order: -1;
   }
 
   .podium-olympic {
@@ -928,6 +970,11 @@ a:hover {
 
   .others-inline {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Slightly shrink countdown text for tablet */
+  .time-pill span {
+    font-size: 1.4rem;
   }
 }
 
@@ -945,9 +992,16 @@ a:hover {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  /* On very small phones, shrink pill width further */
   .time-pill {
-    min-width: 70px;
+    padding: 0.55rem 0.4rem;
+  }
+
+  .time-pill span {
+    font-size: 1.25rem;
+  }
+
+  .time-pill label {
+    font-size: 0.72rem;
   }
 
   .footer-inner {
