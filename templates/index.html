@@ -7,7 +7,6 @@
   <meta name="description" content="Live Shuffle.com wager race leaderboard with real-time updates for RedHunllef." />
   <meta name="theme-color" content="#52ff33" />
   <link rel="icon" href="{{ url_for('static', filename='redlogo.ico') }}" />
-  <!-- Main stylesheet -->
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
 <body>
@@ -245,7 +244,10 @@
         </div>
       </div>
       <div class="footer-meta">
-        <span>Site experience by <a href="https://kick.com/gingrsnaps" target="_blank" rel="noopener">GingrSnaps</a></span>
+        <span>
+          Site experience by
+          <a href="https://kick.com/gingrsnaps" target="_blank" rel="noopener">GingrSnaps</a>
+        </span>
         <span>Backend powered by Shuffle affiliate data.</span>
         <span class="footer-disclaimer">
           All wagering and payouts are subject to review and verification.
@@ -254,7 +256,6 @@
     </div>
   </footer>
 
-  <!-- Single JS bundle (deferred) -->
   <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 </body>
 </html>

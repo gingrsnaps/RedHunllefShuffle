@@ -52,7 +52,7 @@ img {
   display: block;
 }
 
-/* Global links: no underline on hover (header text stays clean) */
+/* Global links: no underlines except where we explicitly add */
 a {
   color: inherit;
   text-decoration: none;
@@ -62,7 +62,7 @@ a:hover {
   text-decoration: none;
 }
 
-/* Container slightly wider so layout doesn’t feel tiny */
+/* Central content width */
 .container {
   width: min(1280px, 94%);
   margin-inline: auto;
@@ -225,11 +225,12 @@ a:hover {
   padding-block: 3.1rem 2.1rem;
 }
 
+/* Align hero copy and hero panel along the top for a clean “inline” feel */
 .hero-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
   gap: clamp(1.8rem, 4.5vw, 3rem);
-  align-items: center;
+  align-items: flex-start;
 }
 
 .hero-heading {
@@ -286,13 +287,16 @@ a:hover {
     box-shadow 0.2s ease;
 }
 
-/* Slight hover lift to make the panel feel dynamic */
+/* Slight hover lift to keep it feeling “alive” */
 .hero-panel:hover {
   transform: translateY(-2px);
   box-shadow: 0 26px 70px rgba(0, 0, 0, 0.9);
 }
 
-/* Live status pill */
+/* ============================================================
+   Live status pill
+   ============================================================ */
+
 .live-status {
   display: inline-flex;
   align-items: center;
@@ -373,7 +377,10 @@ a:hover {
   filter: brightness(1.04);
 }
 
-/* Countdown card */
+/* ============================================================
+   Countdown card
+   ============================================================ */
+
 .countdown-card {
   padding: 1rem 1rem 1.1rem;
   border-radius: 1.1rem;
@@ -382,15 +389,19 @@ a:hover {
     radial-gradient(circle at top, rgba(82, 255, 51, 0.26), transparent 70%),
     var(--bg-soft);
   animation: countdown-breathe 4.5s ease-in-out infinite;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-/* Subtle breathing effect to keep it feeling “live” */
+/* Subtle breathing glow */
 @keyframes countdown-breathe {
   0%, 100% { box-shadow: 0 0 0 rgba(82, 255, 51, 0.0); }
   50%      { box-shadow: 0 0 30px rgba(82, 255, 51, 0.25); }
 }
 
 .countdown-title {
+  width: 100%;
   font-size: 1rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -399,22 +410,16 @@ a:hover {
   margin-bottom: 0.75rem;
 }
 
-/*
- * Countdown layout:
- * - Desktop: four pills in a row with separators (flex, no wrap needed).
- * - When the panel gets narrow, flex-wrap kicks in so pills move to
- *   two rows instead of being cut off (this is what fixes your screenshot).
- */
+/* Layout for the four pills */
 .countdown-wrap {
   display: flex;
-  flex-wrap: wrap;          /* allow wrapping to new line when narrow */
-  justify-content: center;  /* center the group, looks good on all sizes */
+  flex-wrap: wrap;          /* allows wrapping when narrow */
+  justify-content: center;
   align-items: stretch;
   gap: 0.7rem;
-  max-width: 100%;          /* never overflow hero-panel width */
+  max-width: 100%;
 }
 
-/* Slightly smaller minimum width so four pills can fit at more widths */
 .time-pill {
   min-width: 80px;
   padding: 0.7rem 0.9rem;
@@ -445,8 +450,7 @@ a:hover {
   font-weight: 800;
 }
 
-/* On mid-size screens, hide separators to avoid horizontal crowding
-   – pills wrap nicely into a 2x2 grid. */
+/* Hide separators on mid-size screens so layout can wrap cleanly */
 @media (max-width: 880px) {
   .countdown-wrap .sep {
     display: none;
@@ -457,6 +461,7 @@ a:hover {
   margin-top: 0.9rem;
   font-size: 0.85rem;
   color: var(--text-subtle);
+  text-align: center;
 }
 
 /* ============================================================
@@ -533,21 +538,24 @@ a:hover {
 
 .race-header-row {
   display: flex;
-  justify-content: center;  /* Center the header block */
+  justify-content: center;
   margin-bottom: 1.6rem;
 }
 
 .race-header-block {
-  text-align: center;       /* Center title + subtitle text */
+  text-align: center;
 }
 
+/* Center the main leaderboard card like a big-tech column */
 .race-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 1.4rem;
+  justify-items: center;
 }
 
 .leaderboard-card {
+  width: 100%;
+  max-width: 1160px;
   border-radius: var(--radius-lg);
   background:
     linear-gradient(to bottom, rgba(255, 255, 255, 0.02), transparent),
@@ -560,7 +568,6 @@ a:hover {
     box-shadow 0.2s ease;
 }
 
-/* Main card lift */
 .leaderboard-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 26px 70px rgba(0, 0, 0, 0.9);
@@ -576,12 +583,12 @@ a:hover {
   color: var(--text-subtle);
 }
 
-/* Top 3 podium */
+/* Top 3 podium — single row, inline, aligned */
 .podium-olympic {
   display: grid;
-  grid-template-columns: 1fr minmax(0, 1.2fr) 1fr; /* 2nd | 1st | 3rd */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: clamp(0.9rem, 2.5vw, 1.4rem);
-  align-items: flex-end;
+  align-items: stretch;
   margin-bottom: 1.7rem;
 }
 
@@ -592,27 +599,25 @@ a:hover {
     linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(25, 25, 40, 0.96));
   border: 1px solid var(--border-strong);
   padding: 1rem 1rem 1.2rem;
-  transform: translateY(var(--lift, 0));
+  min-height: clamp(230px, 26vw, 260px);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.85);
   overflow: hidden;
 }
 
+/* 1st place highlight */
 .podium-seat.col-first {
-  --lift: -18px;
-  min-height: clamp(250px, 28vw, 290px);
   border-color: var(--gold);
-  box-shadow: 0 0 32px rgba(255, 215, 0, 0.22), var(--shadow-soft);
+  box-shadow:
+    0 0 32px rgba(255, 215, 0, 0.24),
+    var(--shadow-soft);
+  transform: scale(1.02);
 }
 
 .podium-seat.col-second {
-  --lift: -8px;
-  min-height: clamp(210px, 24vw, 240px);
   border-color: var(--silver);
 }
 
 .podium-seat.col-third {
-  --lift: -4px;
-  min-height: clamp(200px, 22vw, 230px);
   border-color: var(--bronze);
 }
 
@@ -668,8 +673,15 @@ a:hover {
   color: var(--text-subtle);
 }
 
+/* Bigger wager / prize text to make it readable at a glance */
 .stat-value {
   font-weight: 600;
+  font-size: 1rem;
+}
+
+/* Slightly larger numbers in the top-3 cards */
+.podium-seat .stat-value {
+  font-size: 1.08rem;
 }
 
 .prize-value {
@@ -727,9 +739,9 @@ a:hover {
   margin-top: 0.5rem;
 }
 
-/* Reuse stat-block for 4–10 rows */
-.others-inline .stat-block {
-  margin-top: 0.45rem;
+/* Larger wager/prize text for 4–10 as well */
+.others-inline .stat-value {
+  font-size: 0.98rem;
 }
 
 .fade-in {
@@ -821,12 +833,76 @@ a:hover {
   color: var(--text-subtle);
 }
 
-.footer-meta a:hover {
-  color: var(--text-main);
+/* GingrSnaps credit pops in Kick green */
+.footer-meta a[href*="gingrsnaps"] {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.footer-meta a[href*="gingrsnaps"]:hover {
+  filter: brightness(1.06);
 }
 
 .footer-disclaimer {
   font-size: 0.8rem;
+}
+
+/* ============================================================
+   404 page
+   ============================================================ */
+
+.error-body {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-main {
+  width: 100%;
+}
+
+.error-card {
+  width: min(460px, 90vw);
+  margin-inline: auto;
+  text-align: center;
+  padding: 2rem 2rem 2.4rem;
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(circle at top, rgba(82, 255, 51, 0.18), transparent 60%),
+    var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-soft);
+}
+
+.error-logo {
+  width: 80px;
+  height: 80px;
+  margin-inline: auto;
+  margin-bottom: 1rem;
+  border-radius: 1.3rem;
+  overflow: hidden;
+  background: #000;
+  animation: logo-bounce 3.3s ease-in-out infinite;
+}
+
+.error-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin-bottom: 0.6rem;
+}
+
+.error-text {
+  font-size: 0.95rem;
+  color: var(--text-subtle);
+  margin-bottom: 1.5rem;
+}
+
+.error-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  justify-content: center;
 }
 
 /* ============================================================
@@ -839,11 +915,15 @@ a:hover {
   }
 
   .hero-panel {
-    order: -1; /* show status/card above copy on mobile */
+    order: -1; /* status/card above copy on mobile */
   }
 
   .podium-olympic {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .race-layout {
+    justify-items: stretch;
   }
 
   .others-inline {
@@ -865,7 +945,7 @@ a:hover {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  /* On very small phones, shrink pill min-width even more */
+  /* On very small phones, shrink pill width further */
   .time-pill {
     min-width: 70px;
   }

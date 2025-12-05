@@ -151,7 +151,7 @@
     const second = norm[1] || { username: '--', wagerStr: '$0.00' };
     const third  = norm[2] || { username: '--', wagerStr: '$0.00' };
 
-    // Render in order: [2nd, 1st, 3rd] so 1st is centered
+    // Render in the visual order: 2nd | 1st | 3rd
     const seats = [
       { place: 2, cls: 'col-second', medal: '🥈', entry: second },
       { place: 1, cls: 'col-first',  medal: '🥇', entry: first  },
@@ -186,7 +186,6 @@
 
   /**
    * Render the rows for ranks 4–10.
-   * The backend may send explicit rank; if not, we derive it.
    *
    * @param {Array<{rank?: number, username: string, wager: string}>} othersRaw
    */
