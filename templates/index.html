@@ -1,32 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>RedHunllef</title>
+  <meta charset="utf-8" />
+  <title>RedHunllef Wager Race</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Live Shuffle.com wager race leaderboard with real-time updates for RedHunllef." />
-  <meta name="theme-color" content="#52ff33" />
-  <link rel="icon" href="{{ url_for('static', filename='redlogo.ico') }}" />
+  <meta name="description"
+        content="Live Shuffle.com wager race leaderboard for RedHunllef – updated automatically in real time." />
+  <!-- Favicon / static assets -->
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='redlogo.png') }}" />
+  <!-- Main stylesheet -->
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
 <body>
-  <!-- =========================================================
-       Sticky header / top navigation
-       ========================================================= -->
-  <header class="site-header">
-    <div class="container nav">
-      <a href="/" class="brand" aria-label="RedHunllef home">
-        <div class="logo">
-          <!-- Bouncing logo; animation handled in style.css -->
-          <img src="{{ url_for('static', filename='redlogo.png') }}" alt="RedHunllef logo" loading="lazy" />
-        </div>
-        <div class="brand-text">
-          <span class="brand-title">RedHunllef</span>
-          <span class="brand-tagline">Live Wager Races</span>
+  <!-- ===================== HEADER ===================== -->
+  <header class="header">
+    <div class="container header-inner">
+      <!-- Brand block with bouncing pixel logo -->
+      <a href="#top" class="brand" aria-label="RedHunllef home">
+        <img src="{{ url_for('static', filename='redlogo.png') }}" alt="" class="logo" />
+        <div class="brand-copy">
+          <span class="brand-title">REDHUNLLEF</span>
+          <span class="brand-subtitle">Live Wager Races</span>
         </div>
       </a>
 
-      <nav class="nav-links" aria-label="Primary navigation">
+      <!-- Primary navigation -->
+      <nav class="header-nav" aria-label="Primary">
         <a href="#leaderboard">Leaderboard</a>
         <a href="#sponsors">Sponsors</a>
         <a href="https://kick.com/redhunllef" target="_blank" rel="noopener">Kick Stream</a>
@@ -34,75 +33,66 @@
     </div>
   </header>
 
-  <main>
-    <!-- =======================================================
-         Hero section: copy + live status + countdown
-         ======================================================= -->
+  <main id="top">
+    <!-- ===================== HERO ===================== -->
     <section class="hero">
-      <div class="container hero-layout">
-        <!-- Left: copy / CTAs -->
+      <div class="container hero-grid">
+        <!-- Hero copy & CTAs -->
         <div class="hero-copy">
-          <div class="hero-kicker">
-            <span class="badge">Real-time wager race</span>
-          </div>
+          <p class="eyebrow">REAL-TIME WAGER RACE</p>
 
           <h1 class="hero-heading">
-            RedHunllef Wager Race
+            Track the top wagerers for RedHunllef in real time.
           </h1>
 
+          <p class="hero-body">
+            This dashboard pulls the latest Shuffle.com wager data for the active race window.
+            No manual refresh, no delay – just a clean, live leaderboard.
+          </p>
+
           <div class="hero-actions">
-            <a
-              class="btn btn-primary"
-              href="https://kick.com/redhunllef"
-              target="_blank"
-              rel="noopener"
-            >
+            <!-- Main CTA – big Kick button -->
+            <a class="btn btn-primary" href="https://kick.com/redhunllef" target="_blank" rel="noopener">
               Watch live on Kick
             </a>
+
+            <!-- Scroll helper -->
             <a class="btn btn-ghost" href="#leaderboard">
               View leaderboard
             </a>
           </div>
 
-          <!-- Responsible gambling link (NCPG) -->
-          <p class="hero-footnote">
-            Updates every 60 seconds •
-            <a
-              class="responsible-link"
-              href="https://www.ncpgambling.org/responsible-gambling/"
-              target="_blank"
-              rel="noopener"
-            >
-              Gamble responsibly
-            </a>.
+          <p class="hero-meta">
+            Updates every 60 seconds ·
+            <a href="https://www.ncpgambling.org/responsible-gambling/" target="_blank" rel="noopener">
+              Gamble responsibly.
+            </a>
           </p>
         </div>
 
-        <!-- Right: live status + countdown -->
-        <aside class="hero-panel" aria-label="Race status">
-          <!-- Live Kick status. Populated by /stream. -->
-          <div id="liveStatus" class="live-status" role="status" aria-live="polite">
-            <div class="live-main">
+        <!-- Live status + countdown card -->
+        <aside class="race-status-card" aria-label="Stream status and race countdown">
+          <div class="status-row">
+            <!-- Live pill controlled by /stream endpoint -->
+            <div id="liveStatus" class="live-status unk" role="status" aria-live="polite">
               <span class="dot" aria-hidden="true"></span>
+              <!-- JS will change this text to "Live on Kick" or "Currently offline" -->
               <span class="text">Checking stream status…</span>
-              <span class="viewer-chip">
-                <span class="label">Viewers</span>
-                <span class="count">--</span>
-              </span>
+              <!-- Viewer count chip, hidden when not applicable -->
+              <span class="viewer-chip" style="display:none"></span>
             </div>
-            <a
-              class="live-cta"
-              href="https://kick.com/redhunllef"
-              target="_blank"
-              rel="noopener"
-            >
+
+            <!-- Persistent Kick CTA specific to the status card -->
+            <a class="btn watch-pill" href="https://kick.com/redhunllef" target="_blank" rel="noopener">
               Watch on Kick
             </a>
           </div>
 
-          <!-- Countdown pills -->
-          <div class="countdown-card" aria-label="Time remaining in the race">
-            <h2 class="countdown-title">Race ends in</h2>
+          <!-- Countdown driven from /config (END_TIME) -->
+          <div class="countdown-card">
+            <p class="countdown-label">RACE ENDS IN</p>
+
+            <!-- These four values are updated once per second by script.js -->
             <div id="countdown" class="countdown-wrap" aria-live="polite">
               <div class="time-pill">
                 <span id="dd">00</span>
@@ -124,7 +114,8 @@
                 <label>Seconds</label>
               </div>
             </div>
-            <p class="countdown-caption">
+
+            <p class="countdown-note">
               The leaderboard below follows this countdown timer.
             </p>
           </div>
@@ -132,122 +123,101 @@
       </div>
     </section>
 
-    <!-- =======================================================
-         Sponsors
-         ======================================================= -->
+    <!-- ===================== SPONSORS ===================== -->
     <section id="sponsors" class="sponsors">
-      <div class="container sponsors-inner">
+      <div class="container">
         <h2 class="section-title">Support RedHunllef</h2>
         <p class="section-subtitle">
-          Visiting sponsors through these links helps keep the stream and race prizes running.
+          Visiting sponsors through these links helps keep the streams and race prizes running.
         </p>
 
         <div class="sponsors-grid">
-          <a
-            href="https://shuffle.com/?r=Red"
-            class="sponsor-btn"
-            target="_blank"
-            rel="noopener"
-          >
+          <!-- You can update these URLs freely -->
+          <a href="https://shuffle.com/?r=Red" class="sponsor-btn" target="_blank" rel="noopener">
             Shuffle.com
           </a>
-          <a
-            href="https://runestake.com/r/Red"
-            class="sponsor-btn"
-            target="_blank"
-            rel="noopener"
-          >
+          <a href="https://runestake.com/r/Red" class="sponsor-btn" target="_blank" rel="noopener">
             RuneStake.com
           </a>
         </div>
       </div>
     </section>
 
-    <!-- =======================================================
-         Leaderboard
-         ======================================================= -->
-    <section id="leaderboard" class="race-section">
-      <div class="container">
-        <div class="race-header-row">
-          <div class="race-header-block">
-            <h2 class="section-title section-title-main">Leaderboard</h2>
-            <p class="section-subtitle">
-              Top wagerers for the active race.
-            </p>
-          </div>
+    <!-- ===================== LEADERBOARD ===================== -->
+    <section id="leaderboard" class="race">
+      <div class="container race-inner">
+        <header class="race-header">
+          <h2 class="section-title centered">Shuffle Wager Leaderboard</h2>
+          <p class="section-subtitle centered small">
+            Top wagerers for the active window – usernames are partially obscured on this page,
+            but full names and wagers are logged securely on the backend.
+          </p>
+        </header>
+
+        <!-- Small info banner above cards -->
+        <div class="helper-card">
+          <p>
+            <strong>No manual refresh needed.</strong>
+            This board updates automatically from the Shuffle API using the configured race window.
+          </p>
         </div>
 
-        <div class="race-layout">
-          <section class="leaderboard-card" aria-label="Top leaderboard">
-            <div class="helper-card">
-              <p>
-                <strong>No manual refresh needed.</strong>
-                This board updates automatically from the Shuffle API.
-              </p>
-            </div>
+        <!-- Podium (1–3) – JS fills these cards -->
+        <div id="podium" class="podium-olympic" aria-label="Top 3 leaderboard"></div>
 
-            <!-- Top 3 podium (populated by script.js) -->
-            <div
-              id="podium"
-              class="podium-olympic"
-              aria-label="Top 3 wagerers"
-            ></div>
+        <!-- 4–11 grid – JS builds these list items -->
+        <ul id="others-list" class="others-grid" aria-label="Ranks 4 to 11"></ul>
 
-            <!-- Positions 4–11 (populated by script.js) -->
-            <ul
-              id="others-list"
-              class="others-inline"
-              aria-label="Ranks 4 to 11"
-            ></ul>
-          </section>
-        </div>
-
-        <section class="race-info-inline" aria-label="Wager race terms and conditions">
-          <h3>Wager Race Terms &amp; Conditions</h3>
-          <p class="race-meta">
-            The RedHunllef wager race uses live affiliate data from Shuffle.com.
-            Rankings are based on <strong>total wagered amount</strong> during the configured
-            time window. All displayed usernames are intentionally masked with asterisks
-            to protect player privacy, while full usernames are logged server-side
-            for auditing and prize verification.
-          </p>
-          <p class="race-meta disclaimer">
-            Wager totals and payouts shown here are for informational purposes only
-            and may be subject to independent verification, review, and adjustment
-            by Shuffle.com and the event organizers.
-          </p>
-        </section>
+        <!-- Legal note under the grid -->
+        <p class="legal-note">
+          Prize values are estimates for this race only and may be subject to review or adjustment
+          by Shuffle.com in accordance with their terms and conditions.
+        </p>
       </div>
     </section>
   </main>
 
-  <!-- =========================================================
-       Footer
-       ========================================================= -->
-  <footer class="site-footer">
-    <div class="container footer-inner">
-      <div class="footer-top">
-        <span>&copy; <span id="year"></span> RedHunllef.</span>
-        <div class="footer-links">
-          <a href="#leaderboard">Leaderboard</a>
-          <a href="#sponsors">Sponsors</a>
-          <a href="https://kick.com/redhunllef" target="_blank" rel="noopener">Kick</a>
-          <a href="https://discord.gg/nhCbCZQEMK" target="_blank" rel="noopener">Discord</a>
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <img src="{{ url_for('static', filename='redlogo.png') }}" alt="" class="footer-logo" />
+        <div>
+          <h3>RedHunllef</h3>
+          <p class="muted">Live leaderboards & Kick streams.</p>
         </div>
       </div>
+
+      <nav class="footer-links" aria-label="Footer">
+        <a href="#leaderboard">Leaderboard</a>
+        <a href="#sponsors">Sponsors</a>
+        <a href="https://kick.com/redhunllef" target="_blank" rel="noopener">Kick Stream</a>
+      </nav>
+
       <div class="footer-meta">
-        <span>
-          Site experience by
-          <a href="https://kick.com/gingrsnaps" target="_blank" rel="noopener">GingrSnaps</a>
-        </span>
-        <span>Backend powered by Shuffle affiliate data.</span>
-        <span class="footer-disclaimer">
-          All wagering and payouts are subject to review and verification.
-        </span>
+        <p>&copy; <span id="year"></span> RedHunllef. All rights reserved.</p>
+        <p>
+          Site by
+          <!-- GingrSnaps is highlighted Kick-green in CSS -->
+          <a href="https://kick.com/gingrsnaps" target="_blank" rel="noopener">GingrSnaps</a>.
+        </p>
+        <p>
+          Join the community on
+          <a href="https://discord.gg/nhCbCZQEMK" target="_blank" rel="noopener">Discord</a>.
+        </p>
+        <p class="muted small">
+          This site is not affiliated with Shuffle.com. If you or someone you know has a gambling problem,
+          please visit
+          <a href="https://www.ncpgambling.org/responsible-gambling/" target="_blank" rel="noopener">
+            ncpgambling.org
+          </a>
+          for help and resources.
+        </p>
       </div>
     </div>
   </footer>
 
+  <!-- JS bundle -->
   <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 </body>
 </html>
