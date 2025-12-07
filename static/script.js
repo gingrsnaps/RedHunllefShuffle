@@ -1,26 +1,19 @@
 (() => {
-  // Small helper for querySelector
+  // Shorthand query helper
   const $ = (sel, root = document) => root.querySelector(sel);
 
-  // Key DOM handles
-  const podiumEl   = $('#podium');       // container for top 3 cards
-  const othersEl   = $('#others-list');  // container for ranks 4–11
-  const liveEl     = $('#liveStatus');   // live status pill
+  const podiumEl   = $('#podium');
+  const othersEl   = $('#others-list');
+  const liveEl     = $('#liveStatus');
   const viewerChip = liveEl?.querySelector('.viewer-chip');
   const statusText = liveEl?.querySelector('.text');
 
-  // Countdown outputs
   const dd = $('#dd'), hh = $('#hh'), mm = $('#mm'), ss = $('#ss');
-
-  // Footer year
   const yearOut = $('#year');
 
   // ------------------------------
-  // Prize table (easily editable)
+  // Prize table – easy to tweak.
   // ------------------------------
-  // Keys are leaderboard positions, values are formatted prize strings.
-  // Rank 11 intentionally has $0.00 so the card still renders but
-  // communicates there is no payout.
   const PRIZES = {
     1: '$1,000.00',
     2: '$500.00',
@@ -35,11 +28,7 @@
     11: '$0.00'
   };
 
-  // -----------------------------------------
-  // Helpers for money / number normalization
-  // -----------------------------------------
   function moneyToNumber(s) {
-    // Accepts "$1,234.56" or a plain number and returns a Number.
     if (typeof s === 'number') return s;
     if (!s) return 0;
     const n = parseFloat(String(s).replace(/[^0-9.]/g, ''));
@@ -47,12 +36,11 @@
   }
 
   function fmtInt(n) {
-    // Comma-separated integer, used for viewer counts.
     return (n ?? 0).toLocaleString();
   }
 
   // -----------------------------------------
-  // Build the podium (1st, 2nd, 3rd)
+  // Podium (1–3) – with new header layout
   // -----------------------------------------
   function buildPodium(podiumRaw) {
     const norm = (podiumRaw || []).map(e => ({
@@ -61,14 +49,14 @@
       wagerNum: moneyToNumber(e?.wager)
     }));
 
-    // Sort defensively in case backend changes order
+    // Sort defensively by wager amount
     norm.sort((a, b) => b.wagerNum - a.wagerNum);
 
     const first  = norm[0] || { username: '--', wagerStr: '$0.00' };
     const second = norm[1] || { username: '--', wagerStr: '$0.00' };
     const third  = norm[2] || { username: '--', wagerStr: '$0.00' };
 
-    // Render in Olympic order: 2nd | 1st | 3rd
+    // Render as Olympic layout: 2 | 1 | 3
     const seats = [
       { place: 2, cls: 'col-second', medal: '🥈', entry: second },
       { place: 1, cls: 'col-first',  medal: '🥇', entry: first  },
@@ -77,12 +65,18 @@
 
     if (!podiumEl) return;
     podiumEl.innerHTML = '';
+
     seats.forEach(s => {
       const el = document.createElement('article');
       el.className = `podium-seat ${s.cls} fade-in`;
+
+      // NOTE: new .podium-head row avoids overlap between the
+      // numeric rank chip and the medal icon.
       el.innerHTML = `
-        <span class="rank-badge">${s.place}</span>
-        <div class="crown" aria-hidden="true">${s.medal}</div>
+        <div class="podium-head">
+          <span class="rank-badge">#${s.place}</span>
+          <span class="crown" aria-hidden="true">${s.medal}</span>
+        </div>
         <div class="user">${s.entry.username}</div>
         <div class="label">TOTAL WAGER</div>
         <div class="wager">${s.entry.wagerStr}</div>
@@ -94,7 +88,7 @@
   }
 
   // -----------------------------------------
-  // Build cards for placements 4–11
+  // Placements 4–11 grid
   // -----------------------------------------
   function buildOthers(othersRaw) {
     if (!othersEl) return;
@@ -114,16 +108,13 @@
     const hasRank = others.some(o => o.rank !== null);
 
     if (hasRank) {
-      // Respect numeric rank from the backend if present
       others.sort((a, b) => (a.rank ?? 999) - (b.rank ?? 999));
     } else {
-      // Fall back to wager amount and assign ranks 4..N
       others.sort((a, b) => b.wagerNum - a.wagerNum);
       others = others.map((o, idx) => ({ ...o, rank: 4 + idx }));
     }
 
-    // We only display 8 cards (ranks 4–11). If fewer are present,
-    // pad with placeholders so the grid stays visually balanced.
+    // 8 cards for ranks 4–11 so desktop grid is 4x2.
     const desiredCards = 8;
     if (others.length < desiredCards) {
       const startRank = 4 + others.length;
@@ -167,7 +158,7 @@
   }
 
   // -----------------------------------------
-  // Live badge + viewer count
+  // Live status badge + viewers
   // -----------------------------------------
   async function fetchStream() {
     if (!liveEl || !statusText || !viewerChip) return;
@@ -182,7 +173,6 @@
       liveEl.classList.remove('live', 'off', 'unk');
 
       if (live) {
-        // Keep this pill narrow so it doesn't push the countdown out of line.
         liveEl.classList.add('live');
         statusText.textContent = 'Live on Kick';
         if (typeof viewers === 'number') {
@@ -203,12 +193,12 @@
       liveEl.classList.remove('live', 'off');
       liveEl.classList.add('unk');
       statusText.textContent = 'Status unavailable';
-      if (viewerChip) viewerChip.style.display = 'none';
+      viewerChip.style.display = 'none';
     }
   }
 
   // -----------------------------------------
-  // Countdown timer (based on backend window)
+  // Countdown timer (based on END_TIME)
   // -----------------------------------------
   async function initCountdown() {
     if (!dd || !hh || !mm || !ss) return;
@@ -234,7 +224,7 @@
         ss.textContent = String(s).padStart(2, '0');
       }
 
-      tick();                 // initial fill
+      tick();
       setInterval(tick, 1000);
     } catch (e) {
       console.warn('[countdown] failed', e);
@@ -250,7 +240,7 @@
     fetchStream();
     initCountdown();
 
-    // Refresh everything every 60 seconds so the page feels "live"
+    // Keep everything feeling live
     setInterval(fetchData, 60_000);
     setInterval(fetchStream, 60_000);
   }

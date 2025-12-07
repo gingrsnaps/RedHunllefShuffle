@@ -5,7 +5,7 @@
   <title>RedHunllef</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description"
-        content="Live Shuffle.com wager race leaderboard for RedHunllef – updated automatically in real time." />
+        content="Live Shuffle.com wager race leaderboard for RedHunllef." />
   <!-- Favicon / static assets -->
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='redlogo.png') }}" />
   <!-- Main stylesheet -->
@@ -76,9 +76,7 @@
             <!-- Live pill controlled by /stream endpoint -->
             <div id="liveStatus" class="live-status unk" role="status" aria-live="polite">
               <span class="dot" aria-hidden="true"></span>
-              <!-- JS will change this text to "Live on Kick" or "Currently offline" -->
               <span class="text">Checking stream status…</span>
-              <!-- Viewer count chip, hidden when not applicable -->
               <span class="viewer-chip" style="display:none"></span>
             </div>
 
@@ -92,7 +90,6 @@
           <div class="countdown-card">
             <p class="countdown-label">RACE ENDS IN</p>
 
-            <!-- These four values are updated once per second by script.js -->
             <div id="countdown" class="countdown-wrap" aria-live="polite">
               <div class="time-pill">
                 <span id="dd">00</span>
@@ -132,7 +129,6 @@
         </p>
 
         <div class="sponsors-grid">
-          <!-- You can update these URLs freely -->
           <a href="https://shuffle.com/?r=Red" class="sponsor-btn" target="_blank" rel="noopener">
             Shuffle.com
           </a>
@@ -170,8 +166,9 @@
 
         <!-- Legal note under the grid -->
         <p class="legal-note">
-          Prize values are estimates for this race only and may be subject to review or adjustment
-          by Shuffle.com and the organizer in accordance with their terms and conditions.
+The RedHunllef wager race uses live affiliate data from Shuffle.com. Rankings are based on <strong>total wagered amount</strong> during the configured time window. All displayed usernames are intentionally masked with asterisks to protect player privacy, while full usernames are logged server-side for auditing and prize verification.
+          
+Wager totals and payouts shown here are for informational purposes only and may be subject to independent verification, review, and adjustment by Shuffle.com and the event organizers.
         </p>
       </div>
     </section>
@@ -198,7 +195,6 @@
         <p>&copy; <span id="year"></span> RedHunllef. All rights reserved.</p>
         <p>
           Site by
-          <!-- GingrSnaps is highlighted Kick-green in CSS -->
           <a href="https://kick.com/gingrsnaps" target="_blank" rel="noopener">GingrSnaps</a>.
         </p>
         <p>

@@ -1,17 +1,14 @@
 /* 
  * RedHunllef Wager Race front-end
  * Clean, modern "big tech" layout with fast, GPU-friendly effects only.
- * All styling is self-contained – safe to drop in as static/style.css.
  */
-
-/* ===== Root + Reset ===== */
 
 :root {
   --bg: #05050a;
   --bg-elevated: #0e1017;
   --bg-soft: #141825;
   --bg-soft-alt: #111320;
-  --accent: #26c281;              /* Kick-style green */
+  --accent: #26c281;
   --accent-soft: #1c8f5b;
   --accent-glow: rgba(38, 194, 129, 0.35);
   --danger: #ff4747;
@@ -51,8 +48,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Generic utility */
-
 a {
   color: inherit;
   text-decoration: none;
@@ -67,7 +62,7 @@ img {
   display: block;
 }
 
-/* Fade-in used for cards after JS renders */
+/* Simple card fade animation */
 
 .fade-in {
   animation: fadeInUp 0.35s ease-out;
@@ -320,7 +315,7 @@ img {
   flex-wrap: wrap;
 }
 
-/* Live status pill (no stream title text to keep it compact) */
+/* Live status pill */
 
 .live-status {
   display: inline-flex;
@@ -400,7 +395,7 @@ img {
   align-items: stretch;
   justify-content: space-between;
   gap: 0.5rem;
-  flex-wrap: nowrap;           /* Keep all four units in one line */
+  flex-wrap: nowrap;
 }
 
 .time-pill {
@@ -519,7 +514,7 @@ img {
   color: var(--text-muted);
 }
 
-/* Podium – 1st in the middle */
+/* Podium – 2 | 1 | 3 */
 
 .podium-olympic {
   display: grid;
@@ -540,6 +535,7 @@ img {
   transition: transform var(--transition-fast), box-shadow var(--transition-fast), filter var(--transition-fast);
 }
 
+/* Center card (1st place) floats slightly higher and glows */
 .podium-seat.col-first {
   transform: translateY(-6px);
   border-color: rgba(255,215,0,0.55);
@@ -552,26 +548,36 @@ img {
   filter: brightness(1.05);
 }
 
+/* New header row inside the podium card so the rank and medal
+   never overlap. */
+
+.podium-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+
+/* Rank badge moved into the header row (no absolute positioning) */
 .rank-badge {
-  position: absolute;
-  top: 10px;
-  left: 10px;
+  padding: 0.18rem 0.6rem;
   border-radius: 999px;
-  padding: 0.15rem 0.55rem;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 800;
   background: #000;
   border: 2px solid #333;
 }
 
+/* Medal icon aligned to the right side of the header row */
 .crown {
-  font-size: 1.3rem;
-  margin-bottom: 0.4rem;
+  font-size: 1.6rem;
 }
+
+/* Base typography within cards */
 
 .user {
   font-weight: 700;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.35rem;
 }
 
 .label {
@@ -585,14 +591,17 @@ img {
   margin-top: 0.4rem;
 }
 
-.wager {
+/* Larger money display for the podium – this restores the “loud”
+   amounts from the earlier version. */
+.podium-seat .wager {
   font-weight: 800;
-  font-size: 1.05rem;
+  font-size: 1.25rem;
   margin-bottom: 0.15rem;
 }
 
-.prize {
+.podium-seat .prize {
   font-weight: 800;
+  font-size: 1.05rem;
   color: var(--accent);
 }
 
@@ -642,8 +651,15 @@ img {
   font-weight: 600;
 }
 
+/* Slightly larger money text for the grid cards as well */
 .others-grid .wager {
-  font-size: 1.02rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.others-grid .prize {
+  font-weight: 700;
+  color: var(--accent);
 }
 
 .legal-note {
@@ -713,7 +729,7 @@ img {
   font-size: 0.8rem;
 }
 
-/* Make GingrSnaps pop in Kick green */
+/* GingrSnaps credit in Kick green */
 .footer-meta a[href*="gingrsnaps"] {
   color: var(--accent);
   font-weight: 600;
@@ -726,8 +742,9 @@ img {
     grid-template-columns: minmax(0, 1fr);
   }
 
+  /* Put the status card on top for mobile */
   .race-status-card {
-    order: -1; /* put status card above hero copy on mobile */
+    order: -1;
   }
 
   .header-inner {
