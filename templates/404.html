@@ -1,34 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Page Not Found — RedHunllef Wager Race</title>
+  <meta charset="utf-8" />
+  <title>Page not found · RedHunllef Wager Race</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" href="{{ url_for('static', filename='redlogo.ico') }}" />
+  <meta name="description"
+        content="404 – The page you are looking for could not be found on RedHunllef's wager race dashboard." />
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='redlogo.png') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
-<body class="error-body">
-  <main class="error-main">
-    <div class="error-card">
-      <div class="error-logo">
-        <img src="{{ url_for('static', filename='redlogo.png') }}" alt="RedHunllef logo" />
+<body>
+  <!-- ===================== HEADER (same as index) ===================== -->
+  <header class="header">
+    <div class="container header-inner">
+      <a href="{{ url_for('index') }}" class="brand" aria-label="RedHunllef home">
+        <img src="{{ url_for('static', filename='redlogo.png') }}" alt="" class="logo" />
+        <div class="brand-copy">
+          <span class="brand-title">REDHUNLLEF</span>
+          <span class="brand-subtitle">Live Wager Races</span>
+        </div>
+      </a>
+
+      <nav class="header-nav" aria-label="Primary">
+        <a href="{{ url_for('index') }}#leaderboard">Leaderboard</a>
+        <a href="{{ url_for('index') }}#sponsors">Sponsors</a>
+        <a href="https://kick.com/redhunllef" target="_blank" rel="noopener">Kick Stream</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===================== MAIN 404 CONTENT ===================== -->
+  <main id="top">
+    <section class="hero">
+      <div class="container hero-grid">
+        <!-- Left: 404 copy -->
+        <div class="hero-copy">
+          <p class="eyebrow">PAGE NOT FOUND</p>
+
+          <h1 class="hero-heading">
+            You’ve wandered off the wager race.
+          </h1>
+
+          <p class="hero-body">
+            The page you’re looking for doesn’t exist, was moved, or never had any wagers
+            placed on it. You can jump back to the live leaderboard or head straight to
+            the Kick stream instead.
+          </p>
+
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="{{ url_for('index') }}">
+              Return to leaderboard
+            </a>
+            <a class="btn btn-ghost" href="https://kick.com/redhunllef" target="_blank" rel="noopener">
+              Watch on Kick
+            </a>
+          </div>
+
+          <p class="hero-meta">
+            If this keeps happening, reach out to the admins so we can investigate.
+          </p>
+        </div>
+
+        <!-- Right: simple status-style card to keep layout balanced -->
+        <aside class="race-status-card" aria-label="404 summary">
+          <div class="countdown-card">
+            <p class="countdown-label">HTTP STATUS</p>
+            <div class="countdown-wrap">
+              <div class="time-pill">
+                <span>404</span>
+                <label>Not found</label>
+              </div>
+            </div>
+            <p class="countdown-note">
+              The URL you entered doesn’t match any route on this dashboard.
+              Try using the navigation above to get back into the race.
+            </p>
+          </div>
+        </aside>
       </div>
-      <h1 class="error-title">404 — Page not found</h1>
-      <p class="error-text">
-        Looks like this route busted. The current wager race and leaderboard live on the main page.
-      </p>
-      <div class="error-actions">
-        <a href="/" class="btn btn-primary">Back to leaderboard</a>
-        <a
-          href="https://kick.com/redhunllef"
-          target="_blank"
-          rel="noopener"
-          class="btn btn-ghost"
-        >
-          Watch on Kick
-        </a>
+    </section>
+  </main>
+
+  <!-- ===================== FOOTER (same as index) ===================== -->
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <img src="{{ url_for('static', filename='redlogo.png') }}" alt="" class="footer-logo" />
+        <div>
+          <h3>RedHunllef</h3>
+          <p class="muted">Live leaderboards & Kick streams.</p>
+        </div>
+      </div>
+
+      <nav class="footer-links" aria-label="Footer">
+        <a href="{{ url_for('index') }}#leaderboard">Leaderboard</a>
+        <a href="{{ url_for('index') }}#sponsors">Sponsors</a>
+        <a href="https://kick.com/redhunllef" target="_blank" rel="noopener">Kick Stream</a>
+      </nav>
+
+      <div class="footer-meta">
+        <p>&copy; <span id="year"></span> RedHunllef. All rights reserved.</p>
+        <p>
+          Site by
+          <a href="https://kick.com/gingrsnaps" target="_blank" rel="noopener">GingrSnaps</a>.
+        </p>
+        <p>
+          Join the community on
+          <a href="https://discord.gg/nhCbCZQEMK" target="_blank" rel="noopener">Discord</a>.
+        </p>
+        <p class="muted small">
+          This site is not affiliated with Shuffle.com. If you or someone you know has a gambling problem,
+          please visit
+          <a href="https://www.ncpgambling.org/responsible-gambling/" target="_blank" rel="noopener">
+            ncpgambling.org
+          </a>
+          for help and resources.
+        </p>
       </div>
     </div>
-  </main>
+  </footer>
+
+  <!-- Reuse same JS so footer year stays dynamic; all calls are null-safe. -->
+  <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 </body>
 </html>
