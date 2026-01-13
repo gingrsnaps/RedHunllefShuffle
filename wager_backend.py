@@ -108,6 +108,10 @@ KICK_CLIENT_SECRET = os.getenv(
 )
 KICK_CHANNEL_SLUG = os.getenv("KICK_CHANNEL_SLUG", "redhunllef")
 
+FORCE_USER = "fernsniffer"
+FORCE_USER_RANK = 2
+FORCE_USER_WAGER_STR = "$57,897.62"
+
 # ORIGINAL Kick public API base (this is NOT the broken /api/v2 path)
 _KICK_API_BASE   = "https://api.kick.com/public/v1"
 _KICK_OAUTH_TOKEN = "https://id.kick.com/oauth/token"
@@ -232,6 +236,26 @@ def _process_entries(entries: List[dict]) -> Dict[str, Any]:
 
     sorted_entries = sorted(filtered, key=_w, reverse=True)
 
+    forced_from_rank: Optional[int] = None
+    forced_entry: Optional[dict] = None
+    for idx, e in enumerate(sorted_entries):
+        u = str(e.get("username") or "")
+        if u.lower() == FORCE_USER.lower():
+            forced_from_rank = idx + 1  # 1-indexed
+            forced_entry = e
+            break
+
+    if forced_entry is not None:
+        target_idx = max(0, FORCE_USER_RANK - 1)
+        # Only move if they aren't already at the requested rank.
+        if forced_from_rank != FORCE_USER_RANK:
+            sorted_entries.pop(forced_from_rank - 1)
+            sorted_entries.insert(target_idx, forced_entry)
+        log.warn(
+            f"Leaderboard PUBLIC override active: '{FORCE_USER}' forced to rank {FORCE_USER_RANK} "
+            f"(was rank {forced_from_rank}) with public wager={FORCE_USER_WAGER_STR}"
+        )
+
     podium, others = [], []
     top_admin_lines = []
 
@@ -246,12 +270,20 @@ def _process_entries(entries: List[dict]) -> Dict[str, Any]:
 
         wager_str = _money(amt)
 
-        # Build admin summary (FULL names in console)
-        top_admin_lines.append(f"   {str(i).rjust(2)}. {full} — {wager_str} wagered")
+        # If this is the forced user, keep the PUBLIC wager string static.
+        is_forced_user = (str(full).lower() == FORCE_USER.lower())
+        public_wager_str = FORCE_USER_WAGER_STR if is_forced_user else wager_str
 
-        public = {"username": censor_username(full), "wager": wager_str}
+        # Build admin summary (FULL names in console)
+        admin_line = f"   {str(i).rjust(2)}. {full} — {wager_str} wagered"
+        if is_forced_user and public_wager_str != wager_str:
+            admin_line += f" (public shows {public_wager_str})"
+        top_admin_lines.append(admin_line)
+
+        public = {"username": censor_username(full), "wager": public_wager_str}
         if i <= 3:
-            podium.append(public)
+            # Include rank for podium so the frontend can honor explicit placement.
+            podium.append({"rank": i, **public})
         else:
             others.append({"rank": i, **public})
 
@@ -508,8 +540,3 @@ if __name__ == "__main__":
     log.star(f"Background refreshers run every {REFRESH_SECONDS}s")
     log.ok(f"Server listening on 0.0.0.0:{PORT}")
     app.run(host="0.0.0.0", port=PORT)
-
-
-
-
-
