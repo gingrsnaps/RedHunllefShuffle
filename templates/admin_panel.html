@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Admin · RedHunllef</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='redlogo.png') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <style>
+    .admin-shell { padding: 2.2rem 0 3rem; }
+    .admin-card { padding: 1rem 1rem 1.1rem; border-radius: 20px; background: rgba(0,0,0,0.45);
+                  border: 1px solid rgba(255,255,255,0.10); box-shadow: 0 14px 36px rgba(0,0,0,0.70); }
+    .admin-row { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+    .admin-row input { padding: .65rem .75rem; border-radius: 12px; border: 1px solid rgba(255,255,255,.12);
+                       background: rgba(0,0,0,.25); color:#fff; min-width: 220px; }
+    .admin-row button { padding: .7rem .9rem; border-radius: 12px; border: 0; cursor: pointer; font-weight: 900; }
+    .btn-green { background: #53fc18; color: #111; }
+    .table { width: 100%; border-collapse: collapse; margin-top: .8rem; }
+    .table th, .table td { padding: .55rem .5rem; border-bottom: 1px solid rgba(255,255,255,0.08); text-align: left; }
+    .muted { opacity:.75; }
+    .pill { display:inline-block; padding:.2rem .55rem; border-radius:999px; background:#000; border:1px solid rgba(255,255,255,0.14); }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <a href="{{ url_for('index') }}" class="brand" aria-label="RedHunllef home">
+        <img src="{{ url_for('static', filename='redlogo.png') }}" alt="" class="logo" />
+        <div class="brand-copy">
+          <span class="brand-title">REDHUNLLEF</span>
+          <span class="brand-subtitle">Admin</span>
+        </div>
+      </a>
+
+      <nav class="header-nav" aria-label="Primary">
+        <a href="{{ url_for('index') }}#leaderboard">Public Site</a>
+        <a href="{{ url_for('admin_logout') }}">Logout</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="admin-shell">
+    <div class="container">
+      <div class="helper-card">
+        <p>
+          Logged in as <strong>{{ admin_user }}</strong>.
+          Updates run every <strong>{{ refresh_seconds }}s</strong>. Overrides apply on the <strong>next</strong> tick.
+        </p>
+        <p class="muted small" style="margin-bottom:.3rem;">
+          Race window (ET): <span class="pill">{{ start_et }}</span> → <span class="pill">{{ end_et }}</span>
+        </p>
+        <p class="muted small" style="margin-bottom:.3rem;">
+          Last refresh (ET): <span class="pill">{{ last_refresh_et }}</span>
+        </p>
+        <p class="muted small" style="margin-bottom:0;">
+          Next refresh (ET): <span class="pill">{{ next_refresh_et }}</span>
+        </p>
+      </div>
+
+      <section class="admin-card">
+        <h3 style="margin-top:0;">Set a player wager override</h3>
+        <p class="muted small" style="margin-top:-.3rem;">
+          Exact username + amount. Commas are fine. Leave amount blank to remove.
+        </p>
+
+        <form method="post" action="{{ url_for('admin_action') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+          <input type="hidden" name="action" value="set_override" />
+          <div class="admin-row">
+            <input name="username" placeholder="Exact username (uncensored)" required />
+            <input name="amount" placeholder="$12,345.67 (blank removes)" />
+            <button class="btn-green" type="submit">Apply</button>
+          </div>
+        </form>
+
+        {% if overrides %}
+          <h4 style="margin-top:1.1rem;">Current overrides</h4>
+          <table class="table">
+            <thead><tr><th>User</th><th>WagerAmount</th></tr></thead>
+            <tbody>
+              {% for k, v in overrides.items() %}
+                <tr><td>{{ k }}</td><td>{{ v }}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% endif %}
+      </section>
+
+      <section class="admin-card" style="margin-top:1rem;">
+        <h3 style="margin-top:0;">Current Top 11 (UNCENSORED)</h3>
+        <p class="muted small" style="margin-top:-.3rem;">This updates on the same 60-second tick as the public board.</p>
+
+        {% if not top %}
+          <p class="muted">Waiting for refresh…</p>
+        {% else %}
+          <table class="table">
+            <thead><tr><th>Rank</th><th>User</th><th>Total Wager</th></tr></thead>
+            <tbody>
+              {% for e in top %}
+                <tr>
+                  <td>#{{ e.rank if e.rank is defined else e["rank"] }}</td>
+                  <td>{{ e.username if e.username is defined else e["username"] }}</td>
+                  <td>{{ e.wager if e.wager is defined else e["wager"] }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% endif %}
+      </section>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "settings": {
+    "mode": "live",
+    "updated_at": 1768479196
+  },
+  "users": {
+    "admin": {
+      "pw_hash": "scrypt:32768:8:1$JI2VGKzy98Q1k8yS$a376440fbabb8bb65e872e09b7dbbdc0a4207010ac91c73c8dccdd4a9fa9984c0bfadd13a9a5de4766aee33a0683db7fe3e9262e5f68a7ab3c2516eb0113c161",
+      "created_at": 1768479196
+    }
+  },
+  "overrides": {},
+  "injections": [],
+  "manual_entries": []
+}
