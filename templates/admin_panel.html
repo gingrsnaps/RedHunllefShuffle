@@ -67,8 +67,8 @@
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
           <input type="hidden" name="action" value="set_override" />
           <div class="admin-row">
-            <input name="username" placeholder="Exact username (uncensored)" required />
-            <input name="amount" placeholder="$12,345.67 (blank removes)" />
+            <input name="username" placeholder="Exact username" required />
+            <input name="amount" placeholder="12345.67 (blank removes)" />
             <button class="btn-green" type="submit">Apply</button>
           </div>
         </form>
@@ -87,7 +87,7 @@
       </section>
 
       <section class="admin-card" style="margin-top:1rem;">
-        <h3 style="margin-top:0;">Current Top 11 (UNCENSORED)</h3>
+        <h3 style="margin-top:0;">Current Top 11</h3>
         <p class="muted small" style="margin-top:-.3rem;">This updates on the same 60-second tick as the public board.</p>
 
         {% if not top %}
@@ -111,3 +111,4 @@
   </main>
 </body>
 </html>
+
