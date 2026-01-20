@@ -46,8 +46,8 @@ def fmt_et(epoch: int) -> str:
 PORT = int(os.getenv("PORT", "8080"))
 REFRESH_SECONDS = int(os.getenv("REFRESH_SECONDS", "60"))
 
-START_TIME = int(os.getenv("START_TIME", "1768345200"))
-END_TIME   = int(os.getenv("END_TIME",   "1768950000"))
+START_TIME = int(os.getenv("START_TIME", "1768950000"))  # 2026-01-20 18:00:00 Eastern
+END_TIME   = int(os.getenv("END_TIME",   "1801090800"))  # 2027-01-27 18:00:00 Eastern
 
 API_KEY = os.getenv("API_KEY", "f45f746d-b021-494d-b9b6-b47628ee5cc9")
 
