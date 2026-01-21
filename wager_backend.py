@@ -23,9 +23,7 @@ from werkzeug.security import check_password_hash
 # -------------------------
 # Logging (console output)
 # -------------------------
-# NOTE:
-# - DigitalOcean App Platform will capture stdout/stderr.
-# - LOG_LEVEL can be set to DEBUG/INFO/WARNING/ERROR via env if you want.
+# DigitalOcean App Platform captures stdout/stderr, so app.logger output is visible in logs.
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper().strip()
 logging.basicConfig(
     level=getattr(logging, LOG_LEVEL, logging.INFO),
@@ -39,11 +37,11 @@ try:
     from zoneinfo import ZoneInfo  # py3.9+
     ET = ZoneInfo("America/New_York")
 except Exception:
-    ET = None  # fallback to UTC formatting
+    ET = None  # fallback
 
 
 def fmt_et(epoch: int) -> str:
-    """Format epoch seconds in Eastern Time (EST/EDT). Falls back to UTC if zoneinfo unavailable."""
+    """Format epoch seconds in Eastern Time (EST/EDT). Falls back to UTC formatting if zoneinfo unavailable."""
     if not epoch:
         return "—"
     try:
@@ -81,9 +79,10 @@ ADMIN_STORE_PATH = os.getenv("ADMIN_STORE_PATH", "admin_store.json")
 # -------------------------
 # Admin credentials (forced)
 # -------------------------
-# Hard-restricted to ONE admin account by request.
+# Requirement: admin access only for 'gingrsnaps'
 ADMIN_USER = "gingrsnaps"
 ADMIN_PASS_HASH = "pbkdf2:sha256:1000000$fi8pVgd7YtNB4oiy$9c625e7b2837a5d9cec2e16040a4741afca264a5689051fadc3a8265185e2de6"
+
 
 # -------------------------
 # Flask app
@@ -101,7 +100,6 @@ app.config.update(
     PERMANENT_SESSION_LIFETIME=timedelta(days=7),
 )
 
-# Ensure Flask logger matches our global logging level
 try:
     app.logger.setLevel(getattr(logging, LOG_LEVEL, logging.INFO))
 except Exception:
@@ -109,27 +107,51 @@ except Exception:
 
 _store_lock = threading.Lock()
 
+# -------------------------
+# Store helpers
+# -------------------------
 
 def store_default() -> Dict[str, Any]:
-    """Default store file (created if missing)."""
+    """Default store file (created if missing).
+
+    NOTE:
+    Your existing admin_store.json already contains extra keys like:
+      - settings
+      - injections
+      - manual_entries
+
+    We include them in the default so a fresh bootstrap matches what your app expects.
+    """
+    now = int(time.time())
     return {
         "version": 1,
         "secret_key": secrets.token_hex(32),
+
+        # Admin/UI settings (preserved if they already exist in the file)
+        "settings": {"mode": "live", "updated_at": now},
+
+        # Auth store
         "users": {
-            ADMIN_USER: {"pw_hash": ADMIN_PASS_HASH, "created_at": int(time.time())}
+            ADMIN_USER: {"pw_hash": ADMIN_PASS_HASH, "created_at": now},
         },
-        "overrides": {},  # {"ExactUsername": 12345.67}
-        "updated_at": int(time.time()),
+
+        # Admin override store:
+        # {"ExactUsername": 12345.67}
+        "overrides": {},
+
+        # Keep these keys stable so the file shape remains consistent.
+        "injections": [],
+        "manual_entries": [],
+
+        "updated_at": now,
     }
 
 
 def store_save(store: Dict[str, Any]) -> None:
-    """
-    Atomic write to admin_store.json.
+    """Atomic write to admin_store.json.
 
-    Why atomic:
-    - Write to a temp file first, then os.replace().
-    - Prevents partial writes if the process is interrupted mid-write.
+    Writes to a temp file then replaces the target file.
+    This prevents partial writes if the process is interrupted.
     """
     tmp = ADMIN_STORE_PATH + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
@@ -138,26 +160,31 @@ def store_save(store: Dict[str, Any]) -> None:
 
 
 def store_load() -> Dict[str, Any]:
-    """
-    Loads admin_store.json with self-healing defaults.
+    """Load admin_store.json safely.
 
-    IMPORTANT CHANGE (fixes freezing):
-    - The previous behavior rewrote admin_store.json on *every* load.
-      That causes heavy disk I/O and can “freeze” requests under load.
-    - Now we only write back to disk when we actually had to repair/add fields
-      (dirty flag), or when the file is missing/corrupt.
+    IMPORTANT FIX (prevents the override submit / admin page from 'freezing'):
+    - The old implementation *always* rewrote admin_store.json on every read,
+      which creates unnecessary disk I/O and lock contention.
+    - Now we only write back to disk when we actually had to repair/initialize
+      missing or invalid keys (dirty=True).
+
+    Also:
+    - We never delete unknown keys (so your existing settings/injections/etc remain).
+    - We ensure the forced admin account exists and has the correct pw hash.
     """
+    # Create file if missing
     if not os.path.exists(ADMIN_STORE_PATH):
         store = store_default()
         store_save(store)
-        app.logger.warning("[store] admin_store.json missing -> created fresh default store")
+        app.logger.warning("[store] admin_store.json missing -> created default")
         return store
 
+    # Read file
     try:
         with open(ADMIN_STORE_PATH, "r", encoding="utf-8") as f:
             store = json.load(f)
         if not isinstance(store, dict):
-            raise ValueError("Store root not a dict")
+            raise ValueError("Store root is not a dict")
     except Exception as e:
         store = store_default()
         store_save(store)
@@ -165,44 +192,57 @@ def store_load() -> Dict[str, Any]:
         return store
 
     dirty = False
+    now = int(time.time())
 
-    # Preserve any extra keys you already have (settings/injections/manual_entries/etc).
-    # We only ensure the required keys exist and are sane.
-    if "version" not in store:
+    # Ensure required keys exist and are sane. Preserve everything else.
+    if store.get("version") is None:
         store["version"] = 1
         dirty = True
 
-    if "secret_key" not in store or not store.get("secret_key"):
+    if not store.get("secret_key"):
         store["secret_key"] = secrets.token_hex(32)
         dirty = True
 
-    if "users" not in store or not isinstance(store.get("users"), dict):
+    if not isinstance(store.get("settings"), dict):
+        store["settings"] = {"mode": "live", "updated_at": now}
+        dirty = True
+
+    if not isinstance(store.get("users"), dict):
         store["users"] = {}
         dirty = True
 
-    if "overrides" not in store or not isinstance(store.get("overrides"), dict):
+    if not isinstance(store.get("overrides"), dict):
         store["overrides"] = {}
         dirty = True
 
-    if "updated_at" not in store or not isinstance(store.get("updated_at"), int):
-        store["updated_at"] = int(time.time())
+    # Keep these keys stable if they exist; if missing, add defaults.
+    if not isinstance(store.get("injections"), list):
+        store["injections"] = []
         dirty = True
 
-    # Force the *single* allowed admin to exist + correct hash.
-    # We do NOT delete other users from disk to avoid unexpected data loss,
-    # but we DO prevent them from logging in (see admin login checks below).
+    if not isinstance(store.get("manual_entries"), list):
+        store["manual_entries"] = []
+        dirty = True
+
+    if not isinstance(store.get("updated_at"), int):
+        store["updated_at"] = now
+        dirty = True
+
+    # Force admin login to exist + correct hash (but do NOT allow other usernames to login)
     users = store["users"]
     if ADMIN_USER not in users or not isinstance(users.get(ADMIN_USER), dict):
-        users[ADMIN_USER] = {"pw_hash": ADMIN_PASS_HASH, "created_at": int(time.time())}
+        users[ADMIN_USER] = {"pw_hash": ADMIN_PASS_HASH, "created_at": now}
         dirty = True
-        app.logger.warning(f"[store] added missing forced admin user {ADMIN_USER!r}")
+        app.logger.warning(f"[store] added forced admin user {ADMIN_USER!r}")
 
+    # Only update hash if it's actually wrong (prevents a write on every load)
     if users[ADMIN_USER].get("pw_hash") != ADMIN_PASS_HASH:
         users[ADMIN_USER]["pw_hash"] = ADMIN_PASS_HASH
         dirty = True
         app.logger.warning(f"[store] repaired pw_hash for forced admin user {ADMIN_USER!r}")
 
     if dirty:
+        store["updated_at"] = now
         store_save(store)
         app.logger.info("[store] repaired store and wrote changes to disk (dirty=True)")
 
@@ -215,6 +255,7 @@ app.secret_key = os.getenv("SECRET_KEY", STORE.get("secret_key") or secrets.toke
 # -------------------------
 # Helpers: masking + money parsing
 # -------------------------
+
 def censor_username(u: str) -> str:
     """Public anonymity rule: first 2 chars + ******"""
     u = (u or "").strip()
@@ -222,50 +263,51 @@ def censor_username(u: str) -> str:
 
 
 def money(amount: float) -> str:
-    """Format a float as USD with commas + 2 decimals."""
+    """Format as USD with commas and two decimals."""
     return f"${float(amount):,.2f}"
 
 
 def parse_money_to_float(s: str) -> float:
-    """
-    Robust amount parser for admin override input.
+    """Parse admin override amount input into a safe float.
 
-    Accepts examples:
+    This is intentionally forgiving so the admin panel never hangs/crashes on input.
+
+    Accepted examples:
       - 25000
       - 25,000
       - $25,000
       - 25000.5
       - $25,000.50
-      - "  $ 25,000  "
+      - '  $ 25,000  '
 
     Rules:
-      - Strips $ and commas and whitespace and any non-digit/non-dot chars.
-      - If you did NOT type a decimal point, we parse as int first (cleaner path).
-      - If there are multiple dots, we keep the first and remove the rest.
-      - Returns 0.0 for invalid / negative / non-finite values.
+      - Strips $ and commas/spaces and any non-digit/non-dot characters.
+      - If NO decimal point is present, parses as int first (whole dollars).
+      - If multiple dots exist (e.g. '12.3.4'), keeps the first and removes the rest.
+      - Rejects negative or non-finite values.
+      - Caps at $1,000,000,000 to prevent insane pasted values from causing trouble.
     """
     raw = str(s or "").strip()
     if not raw:
         return 0.0
 
-    # Remove common formatting first (commas), then strip anything except digits and dot.
-    tmp = raw.replace(",", "")
+    # Remove common separators first
+    tmp = raw.replace(",", "").replace(" ", "")
+    # Keep only digits and dots
     tmp = re.sub(r"[^0-9.]", "", tmp)
 
-    # Handle weird input like "12.3.4" -> keep first dot only => "12.34"
+    # Collapse multiple dots
     if tmp.count(".") > 1:
         first, rest = tmp.split(".", 1)
         rest = rest.replace(".", "")
         tmp = first + "." + rest
 
-    # Edge cases like "." or "" => invalid
     if not tmp or tmp == ".":
         return 0.0
 
     try:
         if "." not in tmp:
-            # If no decimals were used, treat it as an integer dollar amount
-            val = float(int(tmp))
+            val = float(int(tmp))  # whole dollars
         else:
             val = float(tmp)
     except Exception:
@@ -274,12 +316,15 @@ def parse_money_to_float(s: str) -> float:
     if not math.isfinite(val) or val < 0:
         return 0.0
 
+    if val > 1_000_000_000:
+        return 1_000_000_000.0
+
     return val
 
+# -------------------------
+# CSRF
+# -------------------------
 
-# -------------------------
-# CSRF + auth
-# -------------------------
 def csrf_token() -> str:
     tok = session.get("csrf_token")
     if not tok:
@@ -294,11 +339,16 @@ def require_csrf() -> None:
         abort(400)
 
 
+# -------------------------
+# Auth
+# -------------------------
+
 def admin_user() -> Optional[str]:
-    """
-    IMPORTANT CHANGE:
-    - Only treat the session as logged-in if the session user == ADMIN_USER.
-    - This hard-locks admin access to 'gingrsnaps' only (per your requirement).
+    """Return the logged-in admin username, but ONLY if it is the single allowed admin.
+
+    Requirement: admin access must be available for 'gingrsnaps' and nobody else.
+    This hard-locks the session so even if other users exist in admin_store.json,
+    they will not be treated as authenticated for admin routes.
     """
     u = session.get("admin_user")
     return u if u == ADMIN_USER else None
@@ -316,6 +366,7 @@ def login_required(fn):
 # -------------------------
 # Shuffle fetch + cache
 # -------------------------
+
 URL_RANGE = "https://affiliate.shuffle.com/stats/{API_KEY}?startTime={start}&endTime={end}"
 URL_LIFE  = "https://affiliate.shuffle.com/stats/{API_KEY}"
 
@@ -393,10 +444,9 @@ def build_snapshots() -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
     - Public payload: podium + others (masked)
     - Admin top 11: full usernames
 
-    NOTE:
-    - Overrides are injected into the same pool and then sorted,
-      so a forced override value will naturally move up/down in rank
-      as other players surpass or fall below it.
+    Overrides are injected into the same pool and then sorted,
+    so a forced override value naturally moves up/down in rank
+    as other players surpass or fall below it.
     """
     base = fetch_from_shuffle()
     by_name = dedupe_max_by_username(base)
@@ -447,11 +497,10 @@ def build_snapshots() -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
 
 
 def refresh_cache_once() -> None:
-    """
-    Refreshes caches. If Shuffle is temporarily unreachable, keeps the old caches.
-    """
+    """Refreshes caches. If Shuffle is unreachable, keeps old caches."""
     public, admin_top = build_snapshots()
-    # If we got nothing and already have data, don't wipe UI.
+
+    # If we got nothing but already have data, don't wipe UI.
     if not admin_top and ADMIN_CACHE.get("top"):
         return
 
@@ -461,6 +510,8 @@ def refresh_cache_once() -> None:
     with _admin_cache_lock:
         ADMIN_CACHE["top"] = admin_top
         ADMIN_CACHE["last_refresh"] = now
+
+    app.logger.info(f"[refresh] ok top={len(admin_top)}")
 
 
 def refresh_loop() -> None:
@@ -473,25 +524,26 @@ def refresh_loop() -> None:
         time.sleep(max(5, int(REFRESH_SECONDS)))
 
 
-# Do an initial refresh so admin panel isn't empty on first load
+# initial fill so admin panel isn't blank
 refresh_cache_once()
 
 # Start background refresh thread
-t = threading.Thread(target=refresh_loop, daemon=True)
-t.start()
+threading.Thread(target=refresh_loop, daemon=True).start()
+
 
 # -------------------------
-# Kick endpoint (kept minimal; safe default if token unset)
+# Kick endpoint (kept minimal, safe defaults if creds missing)
 # -------------------------
+
 def get_stream_status() -> Dict[str, Any]:
-    """Returns Kick status; if API creds missing, returns not-live safely."""
-    # If you want your prior full Kick logic, you can drop it in here.
-    # Keeping this stable to prevent admin panel issues if Kick breaks.
+    """Returns Kick status. If you have more Kick logic elsewhere, you can expand this safely."""
     return {"live": False, "title": None, "viewers": None, "source": "disabled", "updated": int(time.time())}
+
 
 # -------------------------
 # Routes: public
 # -------------------------
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -513,9 +565,11 @@ def config():
 def stream():
     return jsonify(get_stream_status())
 
+
 # -------------------------
 # Routes: admin
 # -------------------------
+
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
     """
@@ -525,9 +579,8 @@ def admin():
     POST (login):
       - NO CSRF check (prevents 400 when cookie isn't established yet)
 
-    IMPORTANT CHANGE:
-      - Only 'gingrsnaps' is allowed to login (ADMIN_USER).
-      - Even if other users exist in admin_store.json, they are blocked here.
+    IMPORTANT:
+      - Hard restricted to gingrsnaps only.
     """
     csrf_token()
 
@@ -539,15 +592,15 @@ def admin():
         username = (request.form.get("username") or "").strip()
         password = (request.form.get("password") or "")
 
-        # Hard-restrict who can login.
+        # Hard restriction: ONLY gingrsnaps can login.
         if username != ADMIN_USER:
-            app.logger.warning(f"[auth] blocked login attempt for non-admin username={username!r} ip={request.remote_addr!r}")
+            app.logger.warning(f"[auth] blocked login for non-admin username={username!r} ip={request.remote_addr!r}")
             error = "Invalid username or password."
         else:
             with _store_lock:
                 store = store_load()
 
-            # Only check record for ADMIN_USER (even if someone tries other names).
+            # Only validate the single allowed admin record.
             urec = (store.get("users") or {}).get(ADMIN_USER)
 
             if not urec or not check_password_hash(urec.get("pw_hash", ""), password):
@@ -598,13 +651,6 @@ def admin_action():
     """
     Saves an override. DOES NOT refresh caches immediately.
     Public/admin snapshot changes appear on the next scheduled refresh tick.
-
-    IMPORTANT CHANGE:
-    - Amount parsing is hardened so inputs like:
-        "$25,000"
-        "25,000"
-        "25000"
-      are safely accepted without causing weird float edge cases.
     """
     require_csrf()
 
@@ -623,26 +669,24 @@ def admin_action():
         store.setdefault("overrides", {})
 
         if amount_raw == "":
-            # Blank amount removes the override.
             store["overrides"].pop(username, None)
-            app.logger.info(f"[override] removed user={username!r} by_admin={admin_user()!r}")
+            app.logger.info(f"[override] removed user={username!r} by_admin={admin_user()!r} ip={request.remote_addr!r}")
         else:
-            # Robust parsing: ignores $ and commas; treats no-decimal inputs as int.
             parsed = parse_money_to_float(amount_raw)
             store["overrides"][username] = float(parsed)
-            app.logger.info(
-                f"[override] set user={username!r} raw={amount_raw!r} parsed={parsed!r} by_admin={admin_user()!r}"
-            )
+            app.logger.info(f"[override] set user={username!r} raw={amount_raw!r} parsed={parsed!r} by_admin={admin_user()!r} ip={request.remote_addr!r}")
 
         store["updated_at"] = int(time.time())
         store_save(store)
 
-    # No refresh here: changes apply on next 60s tick
+    # No refresh here: changes apply on next tick
     return redirect(url_for("admin"))
+
 
 # -------------------------
 # Errors
 # -------------------------
+
 @app.errorhandler(400)
 def bad_request(_e):
     return (
