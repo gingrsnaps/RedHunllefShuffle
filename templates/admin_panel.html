@@ -159,10 +159,9 @@
       <section class="admin-card">
         <h3 style="margin-top:0;">Set a player wager override</h3>
         <p class="muted small" style="margin-top:-.3rem;">
-          Exact username + override.
-          Use a <strong>fixed amount</strong> (ex: <span class="pill">12,345.67</span>)
-          OR a <strong>rank lock</strong> (ex: <span class="pill">rank:5</span> or <span class="pill">#5</span>)
-          to keep the user at that placement automatically as others move.
+          Exact username + a <strong>fixed total wager amount</strong>.
+          Example: <span class="pill">$25,000</span> or <span class="pill">25000</span>.
+          The leaderboard still ranks normally by wager — if someone has more, they rank above.
           Leave amount blank to remove.
           Overrides do <strong>not</strong> auto-refresh (use <strong>Force Refresh Now</strong> if you want it instantly).
         </p>
@@ -172,7 +171,7 @@
           <input type="hidden" name="action" value="set_override" />
           <div class="admin-row">
             <input name="username" placeholder="Exact username" required />
-            <input name="amount" placeholder="12345.67 (blank removes)" />
+            <input name="amount" placeholder="$25,000 or 25000 (blank removes)" />
             <button class="btn-green" type="submit">Apply</button>
           </div>
         </form>
@@ -362,4 +361,3 @@
   </main>
 </body>
 </html>
-
