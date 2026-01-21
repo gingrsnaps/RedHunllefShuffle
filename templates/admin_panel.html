@@ -9,16 +9,25 @@
   <style>
     .admin-shell { padding: 2.2rem 0 3rem; }
     .admin-card { padding: 1rem 1rem 1.1rem; border-radius: 20px; background: rgba(0,0,0,0.45);
-                  border: 1px solid rgba(255,255,255,0.10); box-shadow: 0 14px 36px rgba(0,0,0,0.70); }
+                  border: 1px solid rgba(255,255,255,0.10); box-shadow: 0 14px 36px rgba(0,0,0,0.70); margin-bottom: 1rem; }
     .admin-row { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
-    .admin-row input { padding: .65rem .75rem; border-radius: 12px; border: 1px solid rgba(255,255,255,.12);
+    .admin-row input, .admin-row select { padding: .65rem .75rem; border-radius: 12px; border: 1px solid rgba(255,255,255,.12);
                        background: rgba(0,0,0,.25); color:#fff; min-width: 220px; }
     .admin-row button { padding: .7rem .9rem; border-radius: 12px; border: 0; cursor: pointer; font-weight: 900; }
     .btn-green { background: #53fc18; color: #111; }
+    .btn-red { background: #ff3b3b; color: #111; }
+    .btn-gray { background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(255,255,255,0.18); }
     .table { width: 100%; border-collapse: collapse; margin-top: .8rem; }
-    .table th, .table td { padding: .55rem .5rem; border-bottom: 1px solid rgba(255,255,255,0.08); text-align: left; }
+    .table th, .table td { padding: .55rem .5rem; border-bottom: 1px solid rgba(255,255,255,0.08); text-align: left; vertical-align: top; }
     .muted { opacity:.75; }
     .pill { display:inline-block; padding:.2rem .55rem; border-radius:999px; background:#000; border:1px solid rgba(255,255,255,0.14); }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+    @media (min-width: 980px) { .grid { grid-template-columns: 1fr 1fr; } }
+    .ok { color: #53fc18; font-weight: 900; }
+    .bad { color: #ff3b3b; font-weight: 900; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    .small { font-size: .92rem; }
+    .note { margin-top: .6rem; padding: .6rem .7rem; border-radius: 12px; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.10); }
   </style>
 </head>
 <body>
@@ -41,6 +50,7 @@
 
   <main class="admin-shell">
     <div class="container">
+
       <div class="helper-card">
         <p>
           Logged in as <strong>{{ admin_user }}</strong>.
@@ -57,40 +67,152 @@
         </p>
       </div>
 
+      <!-- ---------------------------
+           Health / status
+           --------------------------- -->
       <section class="admin-card">
-        <h3 style="margin-top:0;">Set a player wager override</h3>
-        <p class="muted small" style="margin-top:-.3rem;">
-          Exact username + amount. Commas are fine. Leave amount blank to remove.
-        </p>
+        <h3 style="margin-top:0;">System Health</h3>
 
-        <form method="post" action="{{ url_for('admin_action') }}">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-          <input type="hidden" name="action" value="set_override" />
-          <div class="admin-row">
-            <input name="username" placeholder="Exact username" required />
-            <input name="amount" placeholder="12345.67 (blank removes)" />
-            <button class="btn-green" type="submit">Apply</button>
+        {% set ok = health.get('last_refresh_ok') %}
+        <div class="admin-row">
+          <span class="pill mono">
+            Refresh:
+            {% if ok is none %}
+              <span class="muted">unknown</span>
+            {% elif ok %}
+              <span class="ok">OK</span>
+            {% else %}
+              <span class="bad">FAIL</span>
+            {% endif %}
+          </span>
+
+          <span class="pill mono">API ms: {{ health.get('last_api_ms') }}</span>
+          <span class="pill mono">Source: {{ health.get('last_source') }}</span>
+          <span class="pill mono">Updated: {{ health.get('last_refresh_et') }}</span>
+        </div>
+
+        {% if health.get('last_error') %}
+          <div class="note mono small">
+            <strong class="bad">Last error:</strong> {{ health.get('last_error') }}
           </div>
-        </form>
-
-        {% if overrides %}
-          <h4 style="margin-top:1.1rem;">Current overrides</h4>
-          <table class="table">
-            <thead><tr><th>User</th><th>WagerAmount</th></tr></thead>
-            <tbody>
-              {% for k, v in overrides.items() %}
-                <tr><td>{{ k }}</td><td>{{ v }}</td></tr>
-              {% endfor %}
-            </tbody>
-          </table>
         {% endif %}
       </section>
 
-      <section class="admin-card" style="margin-top:1rem;">
-        <h3 style="margin-top:0;">Current Top 11</h3>
-        <p class="muted small" style="margin-top:-.3rem;">This updates on the same 60-second tick as the public board.</p>
+      <div class="grid">
 
-        {% if not top %}
+        <!-- ---------------------------
+             Overrides
+             --------------------------- -->
+        <section class="admin-card">
+          <h3 style="margin-top:0;">Set a player wager override</h3>
+          <p class="muted small" style="margin-top:-.3rem;">
+            Exact username + amount. Commas are fine. Leave amount blank to remove.
+          </p>
+
+          <form method="post" action="{{ url_for('admin_action') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+            <input type="hidden" name="action" value="set_override" />
+            <div class="admin-row">
+              <input name="username" placeholder="Exact username" required />
+              <input name="amount" placeholder="12345.67 (blank removes)" />
+              <button class="btn-green" type="submit">Apply</button>
+            </div>
+          </form>
+
+          {% if overrides %}
+            <h4 style="margin-top:1.1rem;">Current overrides</h4>
+            <table class="table">
+              <thead><tr><th>User</th><th>WagerAmount</th><th>Remove</th></tr></thead>
+              <tbody>
+                {% for k, v in overrides.items() %}
+                  <tr>
+                    <td class="mono">{{ k }}</td>
+                    <td class="mono">{{ v }}</td>
+                    <td>
+                      <form method="post" action="{{ url_for('admin_action') }}" style="margin:0;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+                        <input type="hidden" name="action" value="set_override" />
+                        <input type="hidden" name="username" value="{{ k }}" />
+                        <input type="hidden" name="amount" value="" />
+                        <button class="btn-red" type="submit">Remove</button>
+                      </form>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% endif %}
+        </section>
+
+        <!-- ---------------------------
+             Security controls
+             --------------------------- -->
+        <section class="admin-card">
+          <h3 style="margin-top:0;">Security Controls</h3>
+          <p class="muted small" style="margin-top:-.3rem;">
+            Bans are enforced by IP (request.remote_addr via ProxyFix). If you ban yourself, you’ll lock yourself out until you edit <span class="mono">admin_store.json</span>.
+          </p>
+
+          <form method="post" action="{{ url_for('admin_action') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+            <input type="hidden" name="action" value="ban_ip" />
+            <div class="admin-row">
+              <input name="ip" placeholder="IP to ban (e.g. 203.0.113.5)" required />
+              <button class="btn-red" type="submit">Ban IP</button>
+            </div>
+          </form>
+
+          {% if banned_ips %}
+            <h4 style="margin-top:1.1rem;">Banned IPs</h4>
+            <table class="table">
+              <thead><tr><th>IP</th><th>Unban</th></tr></thead>
+              <tbody>
+                {% for ip in banned_ips %}
+                  <tr>
+                    <td class="mono">{{ ip }}</td>
+                    <td>
+                      <form method="post" action="{{ url_for('admin_action') }}" style="margin:0;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+                        <input type="hidden" name="action" value="unban_ip" />
+                        <input type="hidden" name="ip" value="{{ ip }}" />
+                        <button class="btn-gray" type="submit">Unban</button>
+                      </form>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <p class="muted">No banned IPs.</p>
+          {% endif %}
+        </section>
+
+      </div>
+
+      <!-- ---------------------------
+           Top 11 (with deltas if available)
+           --------------------------- -->
+      <section class="admin-card">
+        <h3 style="margin-top:0;">Current Top 11</h3>
+        <p class="muted small" style="margin-top:-.3rem;">
+          This updates on the same tick as the public board. If deltas are present, they show change since the previous refresh tick.
+        </p>
+
+        {% if top_with_deltas %}
+          <table class="table">
+            <thead><tr><th>Rank</th><th>User</th><th>Total Wager</th><th>Δ (since last tick)</th></tr></thead>
+            <tbody>
+              {% for e in top_with_deltas %}
+                <tr>
+                  <td class="mono">#{{ e.rank if e.rank is defined else e["rank"] }}</td>
+                  <td class="mono">{{ e.username if e.username is defined else e["username"] }}</td>
+                  <td class="mono">{{ e.wager if e.wager is defined else e["wager"] }}</td>
+                  <td class="mono">{{ e.delta_str if e.delta_str is defined else e["delta_str"] }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% elif not top %}
           <p class="muted">Waiting for refresh…</p>
         {% else %}
           <table class="table">
@@ -98,17 +220,155 @@
             <tbody>
               {% for e in top %}
                 <tr>
-                  <td>#{{ e.rank if e.rank is defined else e["rank"] }}</td>
-                  <td>{{ e.username if e.username is defined else e["username"] }}</td>
-                  <td>{{ e.wager if e.wager is defined else e["wager"] }}</td>
+                  <td class="mono">#{{ e.rank if e.rank is defined else e["rank"] }}</td>
+                  <td class="mono">{{ e.username if e.username is defined else e["username"] }}</td>
+                  <td class="mono">{{ e.wager if e.wager is defined else e["wager"] }}</td>
                 </tr>
               {% endfor %}
             </tbody>
           </table>
         {% endif %}
       </section>
+
+      <!-- ---------------------------
+           Super-admin: user management
+           --------------------------- -->
+      <section class="admin-card">
+        <h3 style="margin-top:0;">Admin Users</h3>
+
+        <p class="muted small" style="margin-top:-.3rem;">
+          User management is restricted to <strong>gingrsnaps</strong> only.
+        </p>
+
+        <div class="note mono small">
+          Current admins: {% for u in admin_users %}<span class="pill">{{ u }}</span>{% endfor %}
+        </div>
+
+        {% if not is_superadmin %}
+          <p class="muted">You can see the list, but only gingrsnaps can add/remove/reset passwords.</p>
+        {% else %}
+
+          <h4 style="margin-top:1.1rem;">Add Admin</h4>
+          <form method="post" action="{{ url_for('admin_action') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+            <input type="hidden" name="action" value="add_admin" />
+            <div class="admin-row">
+              <input name="new_username" placeholder="new_admin_user (letters/numbers/_ only)" required />
+              <input name="new_password" placeholder="Password" required />
+              <button class="btn-green" type="submit">Add</button>
+            </div>
+          </form>
+
+          <h4 style="margin-top:1.1rem;">Remove Admin</h4>
+          <form method="post" action="{{ url_for('admin_action') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+            <input type="hidden" name="action" value="remove_admin" />
+            <div class="admin-row">
+              <input name="rm_username" placeholder="username to remove" required />
+              <button class="btn-red" type="submit">Remove</button>
+            </div>
+          </form>
+
+          <h4 style="margin-top:1.1rem;">Reset Admin Password</h4>
+          <form method="post" action="{{ url_for('admin_action') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+            <input type="hidden" name="action" value="set_admin_password" />
+            <div class="admin-row">
+              <input name="pw_username" placeholder="username" required />
+              <input name="pw_password" placeholder="new password" required />
+              <button class="btn-gray" type="submit">Set Password</button>
+            </div>
+          </form>
+
+          <p class="muted small" style="margin-top:.8rem;">
+            Note: the <strong>gingrsnaps</strong> password is forced by <span class="mono">ADMIN_PASS_HASH</span> in the backend, so it can’t be changed via UI.
+          </p>
+        {% endif %}
+      </section>
+
+      <div class="grid">
+
+        <!-- ---------------------------
+             Access log
+             --------------------------- -->
+        <section class="admin-card">
+          <h3 style="margin-top:0;">Recent Access (IPs in order)</h3>
+          <p class="muted small" style="margin-top:-.3rem;">
+            Newest first. This is stored in <span class="mono">admin_store.json</span> as <span class="mono">access_log</span>.
+          </p>
+
+          <form method="post" action="{{ url_for('admin_action') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+            <input type="hidden" name="action" value="clear_access_log" />
+            <div class="admin-row">
+              <button class="btn-gray" type="submit">Clear Access Log</button>
+            </div>
+          </form>
+
+          {% if not access_log %}
+            <p class="muted">No access entries yet.</p>
+          {% else %}
+            <table class="table">
+              <thead><tr><th>Time (ET)</th><th>IP</th><th>Method</th><th>Path</th><th>Status</th><th>ms</th><th>User-Agent</th></tr></thead>
+              <tbody>
+                {% for e in access_log[:120] %}
+                  <tr>
+                    <td class="mono">{{ e.ts_et if e.ts_et is defined else e["ts_et"] }}</td>
+                    <td class="mono">{{ e.ip if e.ip is defined else e["ip"] }}</td>
+                    <td class="mono">{{ e.method if e.method is defined else e["method"] }}</td>
+                    <td class="mono">{{ e.path if e.path is defined else e["path"] }}</td>
+                    <td class="mono">{{ e.status if e.status is defined else e["status"] }}</td>
+                    <td class="mono">{{ e.ms if e.ms is defined else e["ms"] }}</td>
+                    <td class="mono">{{ e.ua if e.ua is defined else e["ua"] }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            <p class="muted small" style="margin-top:.7rem;">Showing up to 120 newest entries.</p>
+          {% endif %}
+        </section>
+
+        <!-- ---------------------------
+             Audit log
+             --------------------------- -->
+        <section class="admin-card">
+          <h3 style="margin-top:0;">Admin Audit Log</h3>
+          <p class="muted small" style="margin-top:-.3rem;">
+            Newest first. Tracks overrides, bans, and (if super-admin) user management. Stored as <span class="mono">audit_log</span>.
+          </p>
+
+          <form method="post" action="{{ url_for('admin_action') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+            <input type="hidden" name="action" value="clear_audit_log" />
+            <div class="admin-row">
+              <button class="btn-gray" type="submit">Clear Audit Log</button>
+            </div>
+          </form>
+
+          {% if not audit_log %}
+            <p class="muted">No admin actions yet.</p>
+          {% else %}
+            <table class="table">
+              <thead><tr><th>Time (ET)</th><th>User</th><th>IP</th><th>Action</th><th>Detail</th></tr></thead>
+              <tbody>
+                {% for e in audit_log[:120] %}
+                  <tr>
+                    <td class="mono">{{ e.ts_et if e.ts_et is defined else e["ts_et"] }}</td>
+                    <td class="mono">{{ e.admin_user if e.admin_user is defined else e["admin_user"] }}</td>
+                    <td class="mono">{{ e.ip if e.ip is defined else e["ip"] }}</td>
+                    <td class="mono">{{ e.action if e.action is defined else e["action"] }}</td>
+                    <td class="mono">{{ e.detail if e.detail is defined else e["detail"] }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            <p class="muted small" style="margin-top:.7rem;">Showing up to 120 newest entries.</p>
+          {% endif %}
+        </section>
+
+      </div>
+
     </div>
   </main>
 </body>
 </html>
-
