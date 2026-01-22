@@ -33,6 +33,36 @@
     code { background: rgba(0,0,0,0.35); padding: .08rem .35rem; border-radius: 8px; }
     .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
     @media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
+
+    /* ---------------------------------------------------------
+       NEW: Scroll container for logs (keeps page height sane)
+       - Adds a scrollbar inside the log panel instead of making
+         the entire page extremely long.
+       - Does NOT remove data or functionality.
+       --------------------------------------------------------- */
+    .log-scroll {
+      max-height: 520px;              /* adjust this to taste (ex: 420px / 600px) */
+      overflow: auto;                 /* enables scrollbar */
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: .2rem .2rem;           /* small inset so the scroll bar doesn’t touch table edges */
+      margin-top: .6rem;
+      background: rgba(0,0,0,0.18);
+    }
+
+    /* Optional: sticky table headers while scrolling the log area */
+    .log-scroll .table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: rgba(10,10,10,0.92); /* ensures header is readable over rows while scrolling */
+      backdrop-filter: blur(6px);
+    }
+
+    /* Optional: slightly tighter row spacing just for logs (keeps more rows visible) */
+    .log-scroll .table th, .log-scroll .table td {
+      padding: .45rem .5rem;
+    }
   </style>
 </head>
 <body>
@@ -111,9 +141,9 @@
 
       <!-- Top 11 -->
       <section class="admin-card">
-        <h3 style="margin:0;">Current Top 11</h3>
+        <h3 style="margin:0;">Current Top 11 (real data, ranked)</h3>
         <p class="muted small" style="margin:.2rem 0 0;">
-          Deltas are computed vs the previous refresh tick.
+          Deltas are computed vs the previous refresh tick (not fabricated).
         </p>
 
         {% if not top11_with_deltas %}
@@ -305,22 +335,25 @@
         </div>
 
         {% if access_log %}
-          <table class="table">
-            <thead><tr><th>Time (ET)</th><th>IP</th><th>Method</th><th>Path</th><th>Status</th><th>ms</th><th>User-Agent</th></tr></thead>
-            <tbody>
-              {% for e in access_log %}
-                <tr>
-                  <td>{{ e.ts_et }}</td>
-                  <td>{{ e.ip }}</td>
-                  <td>{{ e.method }}</td>
-                  <td><code>{{ e.path }}</code></td>
-                  <td>{{ e.status }}</td>
-                  <td>{{ e.ms }}</td>
-                  <td class="muted">{{ e.ua }}</td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+          <!-- NEW: Scroll container so the logs don't make the page insanely long -->
+          <div class="log-scroll" aria-label="Access log scroll region">
+            <table class="table">
+              <thead><tr><th>Time (ET)</th><th>IP</th><th>Method</th><th>Path</th><th>Status</th><th>ms</th><th>User-Agent</th></tr></thead>
+              <tbody>
+                {% for e in access_log %}
+                  <tr>
+                    <td>{{ e.ts_et }}</td>
+                    <td>{{ e.ip }}</td>
+                    <td>{{ e.method }}</td>
+                    <td><code>{{ e.path }}</code></td>
+                    <td>{{ e.status }}</td>
+                    <td>{{ e.ms }}</td>
+                    <td class="muted">{{ e.ua }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         {% else %}
           <p class="muted" style="margin-top:.8rem;">No access logs yet.</p>
         {% endif %}
@@ -338,20 +371,23 @@
         </div>
 
         {% if audit_log %}
-          <table class="table">
-            <thead><tr><th>Time (ET)</th><th>Admin</th><th>IP</th><th>Action</th><th>Detail</th></tr></thead>
-            <tbody>
-              {% for e in audit_log %}
-                <tr>
-                  <td>{{ e.ts_et }}</td>
-                  <td>{{ e.admin_user }}</td>
-                  <td>{{ e.ip }}</td>
-                  <td><code>{{ e.action }}</code></td>
-                  <td class="muted"><code>{{ e.detail }}</code></td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+          <!-- NEW: Scroll container so audit entries don't extend the page forever -->
+          <div class="log-scroll" aria-label="Audit log scroll region">
+            <table class="table">
+              <thead><tr><th>Time (ET)</th><th>Admin</th><th>IP</th><th>Action</th><th>Detail</th></tr></thead>
+              <tbody>
+                {% for e in audit_log %}
+                  <tr>
+                    <td>{{ e.ts_et }}</td>
+                    <td>{{ e.admin_user }}</td>
+                    <td>{{ e.ip }}</td>
+                    <td><code>{{ e.action }}</code></td>
+                    <td class="muted"><code>{{ e.detail }}</code></td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         {% else %}
           <p class="muted" style="margin-top:.8rem;">No admin actions yet.</p>
         {% endif %}
@@ -361,4 +397,3 @@
   </main>
 </body>
 </html>
-
