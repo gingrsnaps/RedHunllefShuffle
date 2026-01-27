@@ -8,8 +8,8 @@
   "reset_admin_store_on_start": false,
 
   "shuffle_api_key": "f45f746d-b021-494d-b9b6-b47628ee5cc9",
-  "start_time": 1768950000,
-  "end_time": 1769554800,
+  "start_time": 1769554800,
+  "end_time": 1770159600,
   "refresh_seconds": 60,
 
   "kick_channel_slug": "redhunllef",
